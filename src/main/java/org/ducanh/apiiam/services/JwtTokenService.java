@@ -2,6 +2,7 @@ package org.ducanh.apiiam.services;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.ducanh.apiiam.dto.responses.UserLoginResponseDto;
 import org.ducanh.apiiam.entities.JwtTokenType;
 import org.ducanh.apiiam.entities.KeyPair;
@@ -16,8 +17,10 @@ import org.springframework.stereotype.Service;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -65,12 +68,24 @@ public class JwtTokenService {
         return new UserLoginResponseDto(accessToken, refreshToken);
     }
 
-    private String generateRefreshToken(User user, KeyPair keyPair, String keyId, OffsetDateTime currentTime,
+    public DecodedJWT validateRefreshToken(String refreshToken) {
+        DecodedJWT decodedJWT = JWT.decode(refreshToken);
+        KeyPair keyPair = keyPairRepository.findKeyPairsByKeyPairId(Long.valueOf(decodedJWT.getKeyId()));
+        try {
+            return JWT.require(getVerifyAlgorithm(keyPair))
+                    .build()
+                    .verify(refreshToken);
+        } catch (Exception ex) {
+            throw new RuntimeException("Verify refreshToken failed", ex);
+        }
+    }
+
+    private String generateRefreshToken(User user, KeyPair keyPair, String id, OffsetDateTime currentTime,
                                         OffsetDateTime expireAt) {
         return JWT.create()
-                .withJWTId(keyId) // Unique JTI
+                .withJWTId(id) // Unique JTI
                 .withSubject(user.getUserId().toString())
-                .withClaim("token_type", JwtTokenType.REFRESH_TOKEN.toString())
+                .withClaim(TOKEN_TYPE, JwtTokenType.REFRESH_TOKEN.toString())
                 .withIssuedAt(currentTime.toInstant())
                 .withExpiresAt(expireAt.toInstant())
                 .withKeyId(keyPair.getKid())
@@ -78,10 +93,10 @@ public class JwtTokenService {
                 .sign(getSigningAlgorithm(keyPair));
     }
 
-    private String generateAccessToken(User user, KeyPair keyPair, String keyId, OffsetDateTime currentTime) {
-        Instant expireAt = currentTime.plus(refreshTokenExpiration).toInstant();
+    private String generateAccessToken(User user, KeyPair keyPair, String id, OffsetDateTime currentTime) {
+        Instant expireAt = currentTime.plus(accessTokenExpiration).toInstant();
         return JWT.create()
-                .withJWTId(keyId) // Unique JTI
+                .withJWTId(id) // Unique JTI
                 .withSubject(user.getUserId().toString())
                 .withIssuedAt(currentTime.toInstant())
                 .withExpiresAt(expireAt)
@@ -101,10 +116,22 @@ public class JwtTokenService {
         try {
             RSAPrivateKey rsaPrivateKey  = (RSAPrivateKey) KeyFactory.getInstance("RSA")
                     .generatePrivate(new PKCS8EncodedKeySpec(privateKey));
-            return Algorithm.RSA256(rsaPrivateKey);
+            return Algorithm.RSA256(null, rsaPrivateKey);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private Algorithm getVerifyAlgorithm(KeyPair keyPair) {
+        if (keyPair.getAlgorithm() != KeyPair.Algorithm.RSA256) {
+            throw new RuntimeException("Key algorithm is not RSA");
+        }
+        try {
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
+                    .generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(keyPair.getPublicKey())));
+            return Algorithm.RSA256(rsaPublicKey, null);
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

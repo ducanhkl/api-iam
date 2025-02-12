@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 
+import static org.ducanh.apiiam.helpers.ValidationHelpers.valArg;
+
 @Service
 public class SessionService {
     
@@ -44,7 +46,15 @@ public class SessionService {
                 .ipAddress(ipAddress)
                 .kid(keyPair.getKid())
                 .sessionType(Session.SessionType.WEB)
+                .active(true)
                 .build();
         return sessionRepository.save(session);
+    }
+
+    public void revokeOldSession(Session session) {
+        valArg(!session.isRevoked(), () -> new RuntimeException("Token is invalid"));
+        valArg(session.isActive(), () -> new RuntimeException("Token inactive"));
+        session.setRevoked(true);
+        sessionRepository.save(session);
     }
 }

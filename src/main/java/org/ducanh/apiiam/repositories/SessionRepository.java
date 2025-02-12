@@ -13,4 +13,6 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
         select count(*) from Session session where session.userId = :userId
         """)
     Integer countSessionByUserId(@Param("userId") Long userId);
+
+    Session findSessionByRefreshTokenId(String refreshTokenId);
 }
