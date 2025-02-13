@@ -7,8 +7,6 @@ import org.ducanh.apiiam.dto.requests.UserRegisterRequestDto;
 import org.ducanh.apiiam.dto.responses.TokenRefreshResponse;
 import org.ducanh.apiiam.dto.responses.UserLoginResponseDto;
 import org.ducanh.apiiam.dto.responses.UserRegisterResponseDto;
-import org.ducanh.apiiam.entities.KeyPair;
-import org.ducanh.apiiam.entities.Namespace;
 import org.ducanh.apiiam.entities.OTP;
 import org.ducanh.apiiam.entities.PasswordAlg;
 import org.ducanh.apiiam.entities.Session;
@@ -22,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import static org.ducanh.apiiam.helpers.ValidationHelpers.stringContainSpecialCharacters;
 import static org.ducanh.apiiam.helpers.ValidationHelpers.valArg;
@@ -102,6 +99,11 @@ public class AuthService {
         User user = userRepository.findByUserId(Long.valueOf(decodeRefreshToken.getSignature()));
         UserLoginResponseDto result = jwtTokenService.issueJwtTokens(user, userAgent, ipAddress);
         return new TokenRefreshResponse(result.accessToken(), result.refreshToken());
+    }
+
+    public void logout(String refreshToken) {
+        DecodedJWT decodeRefreshToken = jwtTokenService.validateRefreshToken(refreshToken);
+        sessionService.deactivateSession(decodeRefreshToken.getId());
     }
 
     private User createUserWithInitialStatus(UserRegisterRequestDto request, Long namespaceId) {

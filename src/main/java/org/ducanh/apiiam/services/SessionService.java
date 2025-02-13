@@ -5,6 +5,7 @@ import org.ducanh.apiiam.entities.Session;
 import org.ducanh.apiiam.entities.User;
 import org.ducanh.apiiam.repositories.SessionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 
@@ -55,6 +56,12 @@ public class SessionService {
         valArg(!session.isRevoked(), () -> new RuntimeException("Token is invalid"));
         valArg(session.isActive(), () -> new RuntimeException("Token inactive"));
         session.setRevoked(true);
+        sessionRepository.save(session);
+    }
+
+    public void deactivateSession(String refreshTokenId) {
+        Session session = sessionRepository.findSessionByRefreshTokenId(refreshTokenId);
+        session.setActive(false);
         sessionRepository.save(session);
     }
 }

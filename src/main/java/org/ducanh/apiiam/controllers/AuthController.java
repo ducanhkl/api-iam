@@ -50,6 +50,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.renewAccessToken(refreshToken, userAgent, ipAddress));
     }
 
+    @DeleteMapping("/logout")
+    public void logout(@RequestHeader("refresh-token") String refreshToken) {
+        authService.logout(refreshToken);
+    }
+
     @PutMapping("complete-verify/{username}")
     public ResponseEntity<?> completeVerify(
             @PathVariable("username") String username,
