@@ -56,6 +56,9 @@ public class Session {
     @Column(name = "revoked", nullable = false)
     private boolean revoked;
 
+    @Column(name = "active", nullable = false)
+    private boolean active;
+
     @Column(name = "userId", nullable = false)
     private Long userId;
 

@@ -1,8 +1,10 @@
 package org.ducanh.apiiam.services;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.ducanh.apiiam.Constants;
 import org.ducanh.apiiam.dto.requests.UserLoginRequestDto;
 import org.ducanh.apiiam.dto.requests.UserRegisterRequestDto;
+import org.ducanh.apiiam.dto.responses.TokenRefreshResponse;
 import org.ducanh.apiiam.dto.responses.UserLoginResponseDto;
 import org.ducanh.apiiam.dto.responses.UserRegisterResponseDto;
 import org.ducanh.apiiam.entities.KeyPair;
@@ -33,6 +35,7 @@ public class AuthService {
     private final OtpService otpService;
     private final JwtTokenService jwtTokenService;
     private final SessionService sessionService;
+    private final SessionRepository sessionRepository;
 
     @Autowired
     public AuthService(UserRepository userRepository,
@@ -40,12 +43,14 @@ public class AuthService {
                        OtpService otpService,
                        SessionService sessionService,
                        KeyPairRepository keyPairRepository,
-                       JwtTokenService jwtTokenService, SessionRepository sessionRepository) {
+                       JwtTokenService jwtTokenService,
+                       SessionRepository sessionRepository) {
         this.userRepository = userRepository;
         this.namespaceRepository = namespaceRepository;
         this.otpService = otpService;
         this.jwtTokenService = jwtTokenService;
         this.sessionService = sessionService;
+        this.sessionRepository = sessionRepository;
     }
 
     public UserRegisterResponseDto register(UserRegisterRequestDto registerRequestDto,
@@ -87,6 +92,16 @@ public class AuthService {
         if (!otpService.completeVerifyOtp(user, code)) {
             throw new RuntimeException("Otp is wrong");
         }
+    }
+
+    public TokenRefreshResponse renewAccessToken(String refreshToken, String userAgent, String ipAddress) {
+        DecodedJWT decodeRefreshToken = jwtTokenService.validateRefreshToken(refreshToken);
+        String refreshTokenId = decodeRefreshToken.getId();
+        Session session = sessionRepository.findSessionByRefreshTokenId(refreshTokenId);
+        sessionService.revokeOldSession(session);
+        User user = userRepository.findByUserId(Long.valueOf(decodeRefreshToken.getSignature()));
+        UserLoginResponseDto result = jwtTokenService.issueJwtTokens(user, userAgent, ipAddress);
+        return new TokenRefreshResponse(result.accessToken(), result.refreshToken());
     }
 
     private User createUserWithInitialStatus(UserRegisterRequestDto request, Long namespaceId) {

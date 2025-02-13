@@ -9,6 +9,8 @@ import java.util.Objects;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    User findByUserId(Long id);
     boolean existsByUsernameAndNamespaceId(String username, Long namespaceId);
     boolean existsByEmailAndNamespaceId(String email, Long namespaceId);
     User findByUsernameAndNamespaceId(String username, Long namespaceId);

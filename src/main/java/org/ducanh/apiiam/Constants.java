@@ -10,5 +10,6 @@ public class Constants {
     public static final String TOKEN_TYPE_NAME = "token_type";
     public static final String NAMESPACE_NAME = "namespace";
     public static final String EMAIL_NAME = "email";
+    public static final String TOKEN_TYPE = "token_type";
 
 }
