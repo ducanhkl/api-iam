@@ -12,6 +12,7 @@ import org.ducanh.apiiam.entities.PasswordAlg;
 import org.ducanh.apiiam.entities.Session;
 import org.ducanh.apiiam.entities.User;
 import org.ducanh.apiiam.entities.UserStatus;
+import org.ducanh.apiiam.helpers.TimeHelpers;
 import org.ducanh.apiiam.repositories.KeyPairRepository;
 import org.ducanh.apiiam.repositories.NamespaceRepository;
 import org.ducanh.apiiam.repositories.SessionRepository;
@@ -33,6 +34,7 @@ public class AuthService {
     private final JwtTokenService jwtTokenService;
     private final SessionService sessionService;
     private final SessionRepository sessionRepository;
+    private final TimeHelpers timeHelpers;
 
     @Autowired
     public AuthService(UserRepository userRepository,
@@ -41,13 +43,14 @@ public class AuthService {
                        SessionService sessionService,
                        KeyPairRepository keyPairRepository,
                        JwtTokenService jwtTokenService,
-                       SessionRepository sessionRepository) {
+                       SessionRepository sessionRepository, TimeHelpers timeHelpers) {
         this.userRepository = userRepository;
         this.namespaceRepository = namespaceRepository;
         this.otpService = otpService;
         this.jwtTokenService = jwtTokenService;
         this.sessionService = sessionService;
         this.sessionRepository = sessionRepository;
+        this.timeHelpers = timeHelpers;
     }
 
     public UserRegisterResponseDto register(UserRegisterRequestDto registerRequestDto,
@@ -72,6 +75,7 @@ public class AuthService {
         PasswordAlg alg = user.getPwdAlg();
         sessionService.checkMaxUserSession(user);
         if (alg.compare(userLoginRequestDto.password(), user.getPasswordHash())) {
+            user.setLastLogin(timeHelpers.currentTime());
             return jwtTokenService.issueJwtTokens(user, userAgent, ipAddress);
         }
         throw new RuntimeException("Invalid password");

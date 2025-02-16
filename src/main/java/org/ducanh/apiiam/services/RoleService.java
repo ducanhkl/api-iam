@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 @Service
 @Slf4j
 public class RoleService {
@@ -33,7 +35,7 @@ public class RoleService {
 
     public Page<RoleResponseDto> getRoles(String roleName, Pageable pageable) {
         final Page<Role> rolePage;
-        if (roleName != null && !roleName.trim().isEmpty()) {
+        if (Objects.nonNull(roleName) && !roleName.trim().isEmpty()) {
             rolePage = roleRepository.findByRoleNameContainingIgnoreCase(roleName.trim(), pageable);
         } else {
             rolePage = roleRepository.findAll(pageable);

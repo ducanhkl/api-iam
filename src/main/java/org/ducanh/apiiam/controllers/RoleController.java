@@ -36,7 +36,7 @@ public class RoleController {
                 .body(response);
     }
 
-    @GetMapping
+    @GetMapping("index")
     public ResponseEntity<List<RoleResponseDto>> getRoles(
             @RequestParam(required = false) String roleName,
             @RequestParam(defaultValue = "0") int page,

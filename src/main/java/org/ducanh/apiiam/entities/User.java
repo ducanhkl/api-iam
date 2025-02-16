@@ -13,7 +13,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldNameConstants;
 import org.ducanh.apiiam.dto.requests.UserRegisterRequestDto;
+import org.ducanh.apiiam.dto.responses.CreateUserResponseDto;
+import org.ducanh.apiiam.dto.responses.GetUserResponseDto;
+import org.ducanh.apiiam.dto.responses.UpdateUserResponseDto;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -26,6 +30,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldNameConstants
 public class User {
 
     @Id
@@ -100,6 +105,57 @@ public class User {
                 .createdAt(OffsetDateTime.now()) // Current timestamp
                 .updatedAt(OffsetDateTime.now()) // Matches createdAt initially
                 .phoneNumber(request.phoneNumber())
+                .build();
+    }
+
+    public CreateUserResponseDto toCreateUserResponse() {
+        return CreateUserResponseDto.builder()
+                .userId(this.userId)
+                .username(this.username)
+                .email(this.email)
+                .isVerified(this.isVerified)
+                .namespaceId(this.namespaceId)
+                .status(this.status)
+                .lastLogin(this.lastLogin)
+                .mfaEnabled(this.mfaEnabled)
+                .accountLocked(this.accountLocked)
+                .phoneNumber(this.phoneNumber)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .build();
+    }
+
+    public GetUserResponseDto toGetUserResponse() {
+        return GetUserResponseDto.builder()
+                .userId(this.userId)
+                .username(this.username)
+                .email(this.email)
+                .isVerified(this.isVerified)
+                .namespaceId(this.namespaceId)
+                .status(this.status)
+                .lastLogin(this.lastLogin)
+                .mfaEnabled(this.mfaEnabled)
+                .accountLocked(this.accountLocked)
+                .phoneNumber(this.phoneNumber)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .build();
+    }
+
+    public UpdateUserResponseDto toUpdateUserResponse() {
+        return UpdateUserResponseDto.builder()
+                .userId(this.userId)
+                .username(this.username)
+                .email(this.email)
+                .isVerified(this.isVerified)
+                .namespaceId(this.namespaceId)
+                .status(this.status)
+                .mfaEnabled(this.mfaEnabled)
+                .accountLocked(this.accountLocked)
+                .phoneNumber(this.phoneNumber)
+                .lastLogin(this.lastLogin)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
                 .build();
     }
 
