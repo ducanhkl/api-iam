@@ -22,7 +22,7 @@ import static org.ducanh.apiiam.Constants.*;
 @RequestMapping("/group")
 @RequiredArgsConstructor
 @Slf4j
-public class GroupControllers {
+public class GroupController {
 
     private final GroupService groupService;
 

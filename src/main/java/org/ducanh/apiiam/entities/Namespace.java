@@ -2,8 +2,6 @@ package org.ducanh.apiiam.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -11,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldNameConstants;
+import org.ducanh.apiiam.dto.responses.NamespaceResponseDto;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -23,6 +23,7 @@ import java.time.OffsetDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldNameConstants
 public class Namespace {
 
     @Id
@@ -30,7 +31,7 @@ public class Namespace {
     private String namespaceId;
 
     @Column(name = "name", nullable = false, unique = true, length = 100)
-    private String name;
+    private String namespaceName;
 
     @Column(name = "description", length = 255)
     private String description;
@@ -45,4 +46,15 @@ public class Namespace {
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
+
+    public NamespaceResponseDto toNamespaceResponseDto() {
+        return NamespaceResponseDto.builder()
+                .namespaceId(this.namespaceId)
+                .namespaceName(this.namespaceName)
+                .description(this.description)
+                .keyPairId(this.keyPairId)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .build();
+    }
 }
