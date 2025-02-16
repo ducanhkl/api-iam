@@ -54,20 +54,20 @@ public class AuthService {
     }
 
     public UserRegisterResponseDto register(UserRegisterRequestDto registerRequestDto,
-                                            Long namespaceId) {
+                                            String namespaceId) {
         validate(registerRequestDto, namespaceId);
         checkRegisInfo(registerRequestDto, namespaceId);
         User user = createUserWithInitialStatus(registerRequestDto, namespaceId);
         return UserRegisterResponseDto.builder()
                 .username(user.getUsername())
                 .userId(user.getUserId())
-                .namepsaceId(user.getNamespaceId()).build();
+                .namespaceId(user.getNamespaceId()).build();
     }
 
     public UserLoginResponseDto login(UserLoginRequestDto userLoginRequestDto,
                                       String ipAddress,
                                       String userAgent) {
-        Long namespaceId = userLoginRequestDto.namespaceId();
+        String namespaceId = userLoginRequestDto.namespaceId();
         validate(userLoginRequestDto);
         User user = userRepository.findByUsernameAndNamespaceId(userLoginRequestDto.username(), namespaceId);
         valArg(Objects.nonNull(user), () -> new RuntimeException("User not found"));
@@ -81,13 +81,13 @@ public class AuthService {
         throw new RuntimeException("Invalid password");
     }
 
-    public void verify(String username, Long namespaceId) {
+    public void verify(String username, String namespaceId) {
         User user = userRepository.findByUsernameAndNamespaceId(username, namespaceId);
         OTP otp = otpService.generateOtpForVerify(user);
         // implement to sent otp;
     }
 
-    public void completeVerify(String username, Long namespaceId,
+    public void completeVerify(String username, String namespaceId,
                                String code) {
         User user = userRepository.findByUsernameAndNamespaceId(username, namespaceId);
         if (!otpService.completeVerifyOtp(user, code)) {
@@ -110,13 +110,13 @@ public class AuthService {
         sessionService.deactivateSession(decodeRefreshToken.getId());
     }
 
-    private User createUserWithInitialStatus(UserRegisterRequestDto request, Long namespaceId) {
+    private User createUserWithInitialStatus(UserRegisterRequestDto request, String namespaceId) {
         String passwordHashed = Constants.DEFAULT_PASSWORD_ALG.hash(request.password());
         User user = User.initUser(request, passwordHashed, Constants.DEFAULT_PASSWORD_ALG, namespaceId);
         return userRepository.save(user);
     }
 
-    private void valUserInfo(User user, Long namespaceId) {
+    private void valUserInfo(User user, String namespaceId) {
         // TO-DO: implement mechanism for limit the number of active session
         namespaceRepository.existOrThrowById(namespaceId);
         valArg(UserStatus.ACTIVE == user.getStatus(), () -> new RuntimeException("User status not valid"));
@@ -131,7 +131,7 @@ public class AuthService {
         valArg(Objects.nonNull(request.namespaceId()), () -> new RuntimeException("NamespaceId cannot be null or empty"));
     }
 
-    private void validate(UserRegisterRequestDto request, Long namespaceId) {
+    private void validate(UserRegisterRequestDto request, String namespaceId) {
         String username = request.username();
         String password = request.password();
         valArg(Objects.nonNull(request.username()), () -> new RuntimeException("Username cannot be null or empty"));
@@ -144,7 +144,7 @@ public class AuthService {
         valArg(stringContainSpecialCharacters(password), () -> new RuntimeException("Password must contain as least one special character"));
     }
 
-    private void checkRegisInfo(UserRegisterRequestDto request, Long namespaceId) {
+    private void checkRegisInfo(UserRegisterRequestDto request, String namespaceId) {
         boolean isUsernameExisted = userRepository.existsByUsernameAndNamespaceId(request.username(), namespaceId);
         boolean isEmailExisted = userRepository.existsByEmailAndNamespaceId(request.email(), namespaceId);
         boolean namespaceExisted = namespaceRepository.existsById(namespaceId);

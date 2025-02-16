@@ -63,7 +63,7 @@ public class Session {
     private Long userId;
 
     @Column(name = "namespaceId", nullable = false)
-    private Long namespaceId;
+    private String namespaceId;
 
     @Column(name = "userAgent", length = 512)
     private String userAgent;

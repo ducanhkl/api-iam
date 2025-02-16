@@ -36,13 +36,14 @@ public class RoleController {
                 .body(response);
     }
 
-    @GetMapping("index")
+    @GetMapping("namespace/{namespaceId}/index")
     public ResponseEntity<List<RoleResponseDto>> getRoles(
             @RequestParam(required = false) String roleName,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @PathVariable(name = "namespaceId") String namespaceId) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<RoleResponseDto> rolePage = roleService.getRoles(roleName, pageable);
+        Page<RoleResponseDto> rolePage = roleService.getRoles(namespaceId, roleName, pageable);
 
         return ResponseEntity.ok()
                 .header(PAGE_NUMBER_HEADER, String.valueOf(rolePage.getNumber()))

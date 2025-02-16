@@ -9,5 +9,5 @@ public record UpdateRoleRequestDto(@NotBlank(message = "Role name is required")
                                    String roleName,
                                    String description,
                                    @NotNull(message = "Namespace ID is required")
-                                   Long namespaceId) {
+                                   String namespaceId) {
 }

@@ -16,8 +16,7 @@ import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 import org.ducanh.apiiam.dto.requests.UserRegisterRequestDto;
 import org.ducanh.apiiam.dto.responses.CreateUserResponseDto;
-import org.ducanh.apiiam.dto.responses.GetUserResponseDto;
-import org.ducanh.apiiam.dto.responses.UpdateUserResponseDto;
+import org.ducanh.apiiam.dto.responses.UserResponseDto;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -58,7 +57,7 @@ public class User {
     private Boolean deleted = false;
 
     @Column(name = "namespace_id")
-    private Long namespaceId;
+    private String namespaceId;
 
     @Column(name = "status", length = 50)
     @Enumerated(jakarta.persistence.EnumType.STRING)
@@ -90,7 +89,7 @@ public class User {
     public static User initUser(UserRegisterRequestDto request,
                                 String passwordHash,
                                 PasswordAlg pwdAlg,
-                                Long namespaceId) {
+                                String namespaceId) {
         return User.builder()
                 .username(request.username())
                 .email(request.email())
@@ -108,8 +107,8 @@ public class User {
                 .build();
     }
 
-    public CreateUserResponseDto toCreateUserResponse() {
-        return CreateUserResponseDto.builder()
+    public UserResponseDto toUserResponseDto() {
+        return UserResponseDto.builder()
                 .userId(this.userId)
                 .username(this.username)
                 .email(this.email)
@@ -120,40 +119,6 @@ public class User {
                 .mfaEnabled(this.mfaEnabled)
                 .accountLocked(this.accountLocked)
                 .phoneNumber(this.phoneNumber)
-                .createdAt(this.createdAt)
-                .updatedAt(this.updatedAt)
-                .build();
-    }
-
-    public GetUserResponseDto toGetUserResponse() {
-        return GetUserResponseDto.builder()
-                .userId(this.userId)
-                .username(this.username)
-                .email(this.email)
-                .isVerified(this.isVerified)
-                .namespaceId(this.namespaceId)
-                .status(this.status)
-                .lastLogin(this.lastLogin)
-                .mfaEnabled(this.mfaEnabled)
-                .accountLocked(this.accountLocked)
-                .phoneNumber(this.phoneNumber)
-                .createdAt(this.createdAt)
-                .updatedAt(this.updatedAt)
-                .build();
-    }
-
-    public UpdateUserResponseDto toUpdateUserResponse() {
-        return UpdateUserResponseDto.builder()
-                .userId(this.userId)
-                .username(this.username)
-                .email(this.email)
-                .isVerified(this.isVerified)
-                .namespaceId(this.namespaceId)
-                .status(this.status)
-                .mfaEnabled(this.mfaEnabled)
-                .accountLocked(this.accountLocked)
-                .phoneNumber(this.phoneNumber)
-                .lastLogin(this.lastLogin)
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
                 .build();

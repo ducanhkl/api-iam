@@ -1,13 +1,12 @@
 package org.ducanh.apiiam.controllers;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.requests.CreateUserRequestDto;
 import org.ducanh.apiiam.dto.requests.IndexUserRequestParamsDto;
 import org.ducanh.apiiam.dto.requests.UpdateUserRequestDto;
-import org.ducanh.apiiam.dto.responses.CreateUserResponseDto;
-import org.ducanh.apiiam.dto.responses.GetUserResponseDto;
-import org.ducanh.apiiam.dto.responses.UpdateUserResponseDto;
+import org.ducanh.apiiam.dto.responses.UserResponseDto;
 import org.ducanh.apiiam.services.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,20 +27,19 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<CreateUserResponseDto> createUser(
+    public ResponseEntity<UserResponseDto> createUser(
             @Valid @RequestBody CreateUserRequestDto requestDto) {
         log.info("Creating user: {}", requestDto);
-        CreateUserResponseDto response = userService.createUser(requestDto);
+        UserResponseDto response = userService.createUser(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("index")
-    public ResponseEntity<List<GetUserResponseDto>> getUsers(
+    public ResponseEntity<List<UserResponseDto>> getUsers(
             IndexUserRequestParamsDto params
     ) {
-
         Pageable pageable = PageRequest.of(params.page(), params.size());
-        Page<GetUserResponseDto> userPage = userService.indexUsers(params, pageable);
+        Page<UserResponseDto> userPage = userService.indexUsers(params, pageable);
 
         return ResponseEntity.ok()
                 .header(PAGE_NUMBER_HEADER, String.valueOf(userPage.getNumber()))
@@ -52,12 +50,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetUserResponseDto> getUser(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDto> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUser(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UpdateUserResponseDto> updateUser(
+    public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserRequestDto requestDto) {
         return ResponseEntity.ok(userService.updateUser(id, requestDto));

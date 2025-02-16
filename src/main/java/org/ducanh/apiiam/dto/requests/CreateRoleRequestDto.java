@@ -12,7 +12,7 @@ public record CreateRoleRequestDto(String roleId,
                                    String roleName,
                                    String description,
                                    @NotNull(message = "Namespace ID is required")
-                                   Long namespaceId,
+                                   String namespaceId,
                                    @NotNull(message = "Created by user ID is required")
                                    Long createdByUserId) {
 }

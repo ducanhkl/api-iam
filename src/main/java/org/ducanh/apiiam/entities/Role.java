@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
+import lombok.experimental.FieldNameConstants;
 import org.ducanh.apiiam.dto.requests.CreateRoleRequestDto;
 import org.ducanh.apiiam.dto.requests.UpdateRoleRequestDto;
 import org.ducanh.apiiam.dto.responses.CreateRoleResponseDto;
@@ -23,6 +24,7 @@ import java.time.OffsetDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldNameConstants
 public class Role {
 
     @Id
@@ -36,7 +38,7 @@ public class Role {
     private String description;
 
     @Column(name = "NAMESPACE_ID", nullable = false)
-    private Long namespaceId;
+    private String namespaceId;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp

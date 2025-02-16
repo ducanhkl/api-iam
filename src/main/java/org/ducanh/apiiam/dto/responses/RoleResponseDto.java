@@ -8,6 +8,6 @@ import java.time.OffsetDateTime;
 public record RoleResponseDto(String roleId,
                               String roleName,
                               String description,
-                              Long namespaceId,
+                              String namespaceId,
                               OffsetDateTime createdAt) {
 }

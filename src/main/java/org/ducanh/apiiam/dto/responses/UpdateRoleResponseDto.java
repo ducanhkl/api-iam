@@ -16,6 +16,6 @@ public class UpdateRoleResponseDto {
     private String roleId;
     private String roleName;
     private String description;
-    private Long namespaceId;
+    private String namespaceId;
     private OffsetDateTime createdAt;
 }

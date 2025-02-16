@@ -26,9 +26,8 @@ import java.time.OffsetDateTime;
 public class Namespace {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "namespace_id", nullable = false, updatable = false)
-    private Long namespaceId;
+    private String namespaceId;
 
     @Column(name = "name", nullable = false, unique = true, length = 100)
     private String name;

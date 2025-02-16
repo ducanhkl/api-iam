@@ -9,6 +9,6 @@ public record CreateRoleResponseDto(
         String roleId,
         String roleName,
         String description,
-        Long namespaceId,
+        String namespaceId,
         OffsetDateTime createdAt
 ) {}

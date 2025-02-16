@@ -34,20 +34,21 @@ public class GroupControllers {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<GroupResponseDto> getGroup(@PathVariable String id) {
         GroupResponseDto response = groupService.getGroup(id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("index")
+    @GetMapping("/namespace/{namespaceId}/index")
     public ResponseEntity<List<GroupResponseDto>> indexGroups(
             @RequestParam(required = false) String groupName,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @PathVariable String namespaceId) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<GroupResponseDto> groupPage = groupService.indexGroups(groupName, pageable);
+        Page<GroupResponseDto> groupPage = groupService.indexGroups(namespaceId, groupName, pageable);
 
         return ResponseEntity.ok()
                 .header(PAGE_NUMBER_HEADER, String.valueOf(groupPage.getNumber()))

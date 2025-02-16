@@ -47,7 +47,7 @@ public class OTP {
     private Long userId;
 
     @Column(name = "namespace_id", nullable = false) // Explicit column name
-    private Long namespaceId;
+    private String namespaceId;
 
     @Column(name = "code", nullable = false, length = 10) // Explicit column name
     private String code;

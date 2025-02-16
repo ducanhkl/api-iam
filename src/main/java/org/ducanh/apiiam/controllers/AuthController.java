@@ -20,7 +20,7 @@ public class AuthController {
     @PostMapping("register")
     public ResponseEntity<UserRegisterResponseDto> register(
             @RequestBody UserRegisterRequestDto userRegisterRequestDto,
-            @RequestHeader(value = "namespace-id", required = true) Long namespaceId) {
+            @RequestHeader(value = "namespace-id", required = true) String namespaceId) {
         return ResponseEntity.ok()
                 .body(authService.register(userRegisterRequestDto, namespaceId));
     }
@@ -35,7 +35,7 @@ public class AuthController {
 
     @PutMapping("verify/{username}")
     public ResponseEntity<?> verify(@PathVariable("username") String username,
-                                    @RequestHeader("namespace-id") Long namespaceId) {
+                                    @RequestHeader("namespace-id") String namespaceId) {
         authService.verify(username, namespaceId);
         return ResponseEntity.ok().build();
     }
@@ -58,7 +58,7 @@ public class AuthController {
     @PutMapping("complete-verify/{username}")
     public ResponseEntity<?> completeVerify(
             @PathVariable("username") String username,
-            @RequestHeader("namespace-id") Long namespaceId,
+            @RequestHeader("namespace-id") String namespaceId,
             @RequestHeader("code") String code
     ) {
         authService.completeVerify(username, namespaceId, code);

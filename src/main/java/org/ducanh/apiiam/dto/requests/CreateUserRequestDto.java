@@ -20,7 +20,7 @@ public record CreateUserRequestDto(@NotBlank(message = "Username is required")
                                    @Size(max = 15)
                                    String phoneNumber,
                                    @NotNull(message = "Namespace ID is required")
-                                   Long namespaceId,
+                                   String namespaceId,
                                    @NotNull(message = "Created by user ID is required")
                                    Long createdByUserId,
                                    @NotNull(message = "Should the user be verified immediately")

@@ -6,9 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.requests.CreateUserRequestDto;
 import org.ducanh.apiiam.dto.requests.IndexUserRequestParamsDto;
 import org.ducanh.apiiam.dto.requests.UpdateUserRequestDto;
-import org.ducanh.apiiam.dto.responses.CreateUserResponseDto;
-import org.ducanh.apiiam.dto.responses.GetUserResponseDto;
-import org.ducanh.apiiam.dto.responses.UpdateUserResponseDto;
+import org.ducanh.apiiam.dto.responses.UserResponseDto;
 import org.ducanh.apiiam.entities.PasswordAlg;
 import org.ducanh.apiiam.entities.User;
 import org.ducanh.apiiam.entities.UserStatus;
@@ -30,9 +28,8 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-
     @Transactional
-    public CreateUserResponseDto createUser(CreateUserRequestDto request) {
+    public UserResponseDto createUser(CreateUserRequestDto request) {
         PasswordAlg passwordAlg = PasswordAlg.BCRYPT;
         String hashedPassword = passwordAlg.hash(request.password());
 
@@ -51,15 +48,15 @@ public class UserService {
                 .build();
 
         User savedUser = userRepository.save(user);
-        return savedUser.toCreateUserResponse();
+        return savedUser.toUserResponseDto();
     }
 
 
-    public Page<GetUserResponseDto> indexUsers(IndexUserRequestParamsDto params, Pageable pageable) {
+    public Page<UserResponseDto> indexUsers(IndexUserRequestParamsDto params, Pageable pageable) {
         return userRepository.findAll(
                 buildSearchCriteria(params),
                 pageable
-        ).map(User::toGetUserResponse);
+        ).map(User::toUserResponseDto);
     }
 
     private Specification<User> buildSearchCriteria(IndexUserRequestParamsDto params) {
@@ -84,23 +81,22 @@ public class UserService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
-    public GetUserResponseDto getUser(Long id) {
+    public UserResponseDto getUser(Long id) {
         return userRepository.findById(id)
-                .map(User::toGetUserResponse)
+                .map(User::toUserResponseDto)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
     @Transactional
-    public UpdateUserResponseDto updateUser(Long id, UpdateUserRequestDto request) {
+    public UserResponseDto updateUser(Long id, UpdateUserRequestDto request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-
         user.setUsername(request.username());
         user.setEmail(request.email());
         user.setPhoneNumber(request.phoneNumber());
         user.setMfaEnabled(request.mfaEnabled());
         user.setAccountLocked(request.accountLocked());
-        return user.toUpdateUserResponse();
+        return user.toUserResponseDto();
     }
 
     @Transactional

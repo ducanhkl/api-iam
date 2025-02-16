@@ -12,11 +12,11 @@ import java.util.Objects;
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
     User findByUserId(Long id);
-    boolean existsByUsernameAndNamespaceId(String username, Long namespaceId);
-    boolean existsByEmailAndNamespaceId(String email, Long namespaceId);
-    User findByUsernameAndNamespaceId(String username, Long namespaceId);
+    boolean existsByUsernameAndNamespaceId(String username, String namespaceId);
+    boolean existsByEmailAndNamespaceId(String email, String namespaceId);
+    User findByUsernameAndNamespaceId(String username, String namespaceId);
 
-    default User findByUsernameAndNamespaceIdOrThrow(String username, Long namespaceId) {
+    default User findByUsernameAndNamespaceIdOrThrow(String username, String namespaceId) {
         User user = findByUsernameAndNamespaceId(username, namespaceId);
         if (Objects.isNull(user)) {
             throw new RuntimeException("Username not existed");

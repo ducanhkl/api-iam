@@ -9,15 +9,12 @@ import lombok.Builder;
 public record UpdateUserRequestDto(@NotBlank(message = "Username is required")
                                    @Size(max = 50)
                                    String username,
-
                                    @NotBlank(message = "Email is required")
                                    @Email
                                    @Size(max = 100)
                                    String email,
-
                                    @Size(max = 15)
                                    String phoneNumber,
-
                                    Boolean mfaEnabled,
                                    Boolean accountLocked) {
 }

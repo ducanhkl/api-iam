@@ -30,9 +30,11 @@ public class GroupService {
     }
 
     public GroupResponseDto createGroup(CreateGroupRequestDto request) {
+        groupRepository.notExistsByNamespaceIdAndGroupIdOrThrow(request.groupId(), request.namespaceId());
         Group group = Group.builder()
                 .groupName(request.groupName())
                 .description(request.description())
+                .namespaceId(request.namespaceId())
                 .groupId(request.groupId())
                 .build();
 
@@ -56,8 +58,8 @@ public class GroupService {
                 .orElseThrow(() -> new RuntimeException("Group not found with id: " + id));
     }
 
-    public Page<GroupResponseDto> indexGroups(String groupName, Pageable pageable) {
-        return groupRepository.findAll(buildSearchCriteria(groupName), pageable)
+    public Page<GroupResponseDto> indexGroups(String namespaceId, String groupName, Pageable pageable) {
+        return groupRepository.findAll(buildSearchCriteria(namespaceId, groupName), pageable)
                 .map(Group::toGroupResponseDto);
     }
 
@@ -67,17 +69,17 @@ public class GroupService {
         groupRepository.delete(group);
     }
 
-    private Specification<Group> buildSearchCriteria(String groupName) {
+    private Specification<Group> buildSearchCriteria(String namespaceId, String groupName) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-
+            predicates.add(cb.equal(root.get(Group.Fields.namespaceId), namespaceId));
             if (StringUtils.hasText(groupName)) {
-                predicates.add(cb.equal(
+                predicates.add(cb.like(
                         cb.lower(root.get(Group.Fields.groupName)),
-                        groupName.toLowerCase().trim()
+                        "%" + groupName.toLowerCase().trim() + "%"
                 ));
             }
-            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 }
