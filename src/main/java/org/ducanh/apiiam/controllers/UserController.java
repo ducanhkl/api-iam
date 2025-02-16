@@ -41,7 +41,7 @@ public class UserController {
     ) {
 
         Pageable pageable = PageRequest.of(params.page(), params.size());
-        Page<GetUserResponseDto> userPage = userService.getUsers(params, pageable);
+        Page<GetUserResponseDto> userPage = userService.indexUsers(params, pageable);
 
         return ResponseEntity.ok()
                 .header(PAGE_NUMBER_HEADER, String.valueOf(userPage.getNumber()))

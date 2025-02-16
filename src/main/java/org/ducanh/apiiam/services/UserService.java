@@ -55,7 +55,7 @@ public class UserService {
     }
 
 
-    public Page<GetUserResponseDto> getUsers(IndexUserRequestParamsDto params, Pageable pageable) {
+    public Page<GetUserResponseDto> indexUsers(IndexUserRequestParamsDto params, Pageable pageable) {
         return userRepository.findAll(
                 buildSearchCriteria(params),
                 pageable
@@ -98,14 +98,8 @@ public class UserService {
         user.setUsername(request.username());
         user.setEmail(request.email());
         user.setPhoneNumber(request.phoneNumber());
-
-        if (request.mfaEnabled() != null) {
-            user.setMfaEnabled(request.mfaEnabled());
-        }
-        if (request.accountLocked() != null) {
-            user.setAccountLocked(request.accountLocked());
-        }
-
+        user.setMfaEnabled(request.mfaEnabled());
+        user.setAccountLocked(request.accountLocked());
         return user.toUpdateUserResponse();
     }
 
