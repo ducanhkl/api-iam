@@ -5,7 +5,6 @@ import org.ducanh.apiiam.entities.Session;
 import org.ducanh.apiiam.entities.User;
 import org.ducanh.apiiam.repositories.SessionRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 
@@ -63,5 +62,9 @@ public class SessionService {
         Session session = sessionRepository.findSessionByRefreshTokenId(refreshTokenId);
         session.setActive(false);
         sessionRepository.save(session);
+    }
+
+    public void deactiveAllActiveSessions(User user) {
+
     }
 }

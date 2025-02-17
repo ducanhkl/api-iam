@@ -1,11 +1,14 @@
 package org.ducanh.apiiam.controllers;
 
+import feign.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.requests.CreateUserRequestDto;
 import org.ducanh.apiiam.dto.requests.IndexUserRequestParamsDto;
+import org.ducanh.apiiam.dto.requests.UpdatePasswordRequestDto;
 import org.ducanh.apiiam.dto.requests.UpdateUserRequestDto;
+import org.ducanh.apiiam.dto.responses.UserLoginResponseDto;
 import org.ducanh.apiiam.dto.responses.UserResponseDto;
 import org.ducanh.apiiam.services.UserService;
 import org.springframework.data.domain.Page;
@@ -65,5 +68,15 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{userId}")
+    public ResponseEntity<UserLoginResponseDto> updatePassword(
+            @PathVariable Long userId,
+            @Valid @RequestBody UpdatePasswordRequestDto requestDto,
+            @RequestHeader("ip-address") String ipAddress,
+            @RequestHeader("user-agent") String userAgent
+    ) {
+        return ResponseEntity.ok(userService.updatePassword(userId, requestDto, ipAddress, userAgent));
     }
 }

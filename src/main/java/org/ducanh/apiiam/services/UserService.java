@@ -5,15 +5,19 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.requests.CreateUserRequestDto;
 import org.ducanh.apiiam.dto.requests.IndexUserRequestParamsDto;
+import org.ducanh.apiiam.dto.requests.UpdatePasswordRequestDto;
 import org.ducanh.apiiam.dto.requests.UpdateUserRequestDto;
+import org.ducanh.apiiam.dto.responses.UserLoginResponseDto;
 import org.ducanh.apiiam.dto.responses.UserResponseDto;
 import org.ducanh.apiiam.entities.PasswordAlg;
 import org.ducanh.apiiam.entities.User;
 import org.ducanh.apiiam.entities.UserStatus;
+import org.ducanh.apiiam.repositories.SessionRepository;
 import org.ducanh.apiiam.repositories.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -21,12 +25,24 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.ducanh.apiiam.helpers.ValidationHelpers.valArg;
+
 @Service
 @Slf4j
-@AllArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final SessionService sessionService;
+    private final JwtTokenService jwtTokenService;
+
+    public UserService(UserRepository userRepository,
+                       SessionService sessionService,
+                       JwtTokenService jwtTokenService
+                       ) {
+        this.userRepository = userRepository;
+        this.sessionService = sessionService;
+        this.jwtTokenService = jwtTokenService;
+    }
 
     @Transactional
     public UserResponseDto createUser(CreateUserRequestDto request) {
@@ -104,6 +120,29 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         user.setDeleted(true);
+    }
+
+    public UserLoginResponseDto updatePassword(Long userId,
+                                               UpdatePasswordRequestDto updatePasswordRequestDto,
+                                               String userAgent,
+                                               String ipAddress) {
+        User user = userRepository.findByUserIdOrThrow(userId);
+        valUserInfoForChangePassword(user);
+        PasswordAlg passwordAlg = user.getPwdAlg();
+        if (!passwordAlg.compare(updatePasswordRequestDto.oldPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Old password does not match");
+        }
+        String hashed = passwordAlg.hash(updatePasswordRequestDto.newPassword());
+        user.setPasswordHash(hashed);
+        if (updatePasswordRequestDto.isLogoutOtherSession()) {
+            sessionService.deactiveAllActiveSessions(user);
+        }
+        return jwtTokenService.issueJwtTokens(user, userAgent, ipAddress);
+    }
+
+    private void valUserInfoForChangePassword(User user) {
+        valArg(!user.getDeleted(), () -> new RuntimeException("User deleted"));
+        valArg(user.getIsVerified(), () -> new RuntimeException("User not verified"));
     }
 
 }

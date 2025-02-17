@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Objects;
+
+import static org.ducanh.apiiam.helpers.ValidationHelpers.valArg;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
@@ -16,11 +17,10 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     boolean existsByEmailAndNamespaceId(String email, String namespaceId);
     User findByUsernameAndNamespaceId(String username, String namespaceId);
 
-    default User findByUsernameAndNamespaceIdOrThrow(String username, String namespaceId) {
-        User user = findByUsernameAndNamespaceId(username, namespaceId);
-        if (Objects.isNull(user)) {
-            throw new RuntimeException("Username not existed");
-        }
+    default User findByUserIdOrThrow(Long userId) {
+        User user = findByUserId(userId);
+        valArg(Objects.nonNull(user), () -> new RuntimeException("User not exist"));
         return user;
     }
+
 }
