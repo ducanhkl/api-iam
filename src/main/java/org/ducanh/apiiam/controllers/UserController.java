@@ -1,6 +1,5 @@
 package org.ducanh.apiiam.controllers;
 
-import feign.Response;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
