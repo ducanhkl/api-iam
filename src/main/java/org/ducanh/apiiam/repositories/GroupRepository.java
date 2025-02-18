@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface GroupRepository extends JpaRepository<Group, String>, JpaSpecificationExecutor<Group> {
     boolean existsByGroupIdAndNamespaceId(String groupId, String namespaceId);
@@ -15,4 +17,6 @@ public interface GroupRepository extends JpaRepository<Group, String>, JpaSpecif
             throw new RuntimeException("Role existed");
         }
     };
+
+    boolean existsAllByNamespaceIdAndGroupIdIn(String namespaceId, List<String> groupIds);
 }

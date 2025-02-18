@@ -69,7 +69,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{userId}")
+    @PatchMapping("/{userId}/password")
     public ResponseEntity<UserLoginResponseDto> updatePassword(
             @PathVariable Long userId,
             @Valid @RequestBody UpdatePasswordRequestDto requestDto,

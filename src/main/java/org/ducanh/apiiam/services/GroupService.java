@@ -82,4 +82,6 @@ public class GroupService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+
+
 }

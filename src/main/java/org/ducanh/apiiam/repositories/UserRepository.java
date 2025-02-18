@@ -1,6 +1,7 @@
 package org.ducanh.apiiam.repositories;
 
 import org.ducanh.apiiam.entities.User;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -22,5 +23,4 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
         valArg(Objects.nonNull(user), () -> new RuntimeException("User not exist"));
         return user;
     }
-
 }
