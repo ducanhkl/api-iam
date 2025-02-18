@@ -34,7 +34,7 @@ public class UserGroupController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
+    @GetMapping("users/{userId}/groups")
     public ResponseEntity<Page<GroupResponseDto>> getUserGroups(
             @PathVariable Long userId,
             @RequestParam(required = false) String groupName,
@@ -43,7 +43,7 @@ public class UserGroupController {
         return ResponseEntity.ok(userGroupService.getUserGroups(userId, groupName, pageable));
     }
 
-    @GetMapping("/not-belong")
+    @GetMapping("users/{userId}/groups/not-belong")
     public ResponseEntity<Page<GroupResponseDto>> getGroupsNotBelongToUser(
             @PathVariable Long userId,
             @RequestParam(required = false) String groupName,
@@ -52,7 +52,7 @@ public class UserGroupController {
         return ResponseEntity.ok(userGroupService.getUserGroupsNotBelongToUser(userId, groupName, pageable));
     }
 
-    @PostMapping("/verify")
+    @PostMapping("users/{userId}/groups/verify")
     public ResponseEntity<List<VerifyUserGroupResponseDto>> verifyUserGroups(
             @PathVariable Long userId,
             @Valid @RequestBody VerifyGroupsRequestDto request) {
