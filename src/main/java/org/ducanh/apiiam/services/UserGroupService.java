@@ -5,6 +5,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.responses.GroupResponseDto;
+import org.ducanh.apiiam.dto.responses.UserGroupResponseDto;
 import org.ducanh.apiiam.dto.responses.VerifyUserGroupResponseDto;
 import org.ducanh.apiiam.entities.Group;
 import org.ducanh.apiiam.entities.User;
@@ -19,8 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,56 +60,37 @@ public class UserGroupService {
         userGroupRepository.saveAll(newUserGroups);
     }
 
-    public Page<GroupResponseDto> getUserGroups(Long userId, String groupName, Pageable pageable) {
-        return groupRepository.findAll(buildSpecToFindGroupByUserId(userId, groupName), pageable)
-                .map(Group::toGroupResponseDto);
+    public Page<UserGroupResponseDto> getUserGroups(Long userId, String groupName, Boolean assignedOnly, Pageable pageable) {
+        Page<Group> result = groupRepository.findAll(buildSpecToFindGroupByUserId(userId, groupName, assignedOnly), pageable);
+        List<String> groupIds = result.stream().map(Group::getGroupId).toList();
+        if (assignedOnly) {
+            return result.map(group -> group.userGroupResponseDto(true));
+        }
+        List<String> groupIdsExisted = userGroupRepository.findAllUserGroupsByUserIdAndGroupIdIn(userId, groupIds)
+                .stream().map(UserGroup::getGroupId).toList();
+        Set<String> groupIdsAssignedSet = new HashSet<>(groupIdsExisted);
+        return result.map(group -> group.userGroupResponseDto(groupIdsAssignedSet.contains(group.getGroupId())));
     }
 
     public List<VerifyUserGroupResponseDto> verifyUserGroups(Long userId, List<String> groupIds) {
-        User user = userRepository.findByUserIdOrThrow(userId);
-        String namespaceId = user.getNamespaceId();
-        List<UserGroup> userGroups = userGroupRepository.findAllUserGroupByUserIdAndNamespaceId(userId, namespaceId);
+        userRepository.findByUserIdOrThrow(userId);
+        List<UserGroup> userGroups = userGroupRepository.findAllUserGroupsByUserIdAndGroupIdIn(userId, groupIds);
         return userGroups.stream()
                 .map((userGroup) -> new VerifyUserGroupResponseDto(userGroup.getGroupId(), userGroup.getAssignedAt()))
                 .toList();
     }
 
-    public Page<GroupResponseDto> getUserGroupsNotBelongToUser(Long userId, String groupName, Pageable pageable) {
-        User user = userRepository.findByUserIdOrThrow(userId);
-        String namespaceId = user.getNamespaceId();
-        return groupRepository.findAll(buildSpecToFindGroupNotBelongToUser(userId, namespaceId, groupName), pageable)
-                .map(Group::toGroupResponseDto);
-    }
-
-    private Specification<Group> buildSpecToFindGroupNotBelongToUser(Long userId, String namespaceId, String groupName) {
+    private Specification<Group> buildSpecToFindGroupByUserId(Long userId, String groupName, Boolean assignedOnly) {
         return (root, query, cb) -> {
             assert query != null;
             List<Predicate> predicates = new ArrayList<>();
-            Subquery<String> userGroupSubquery = query.subquery(String.class);
-            Root<UserGroup> userGroupRoot = userGroupSubquery.from(UserGroup.class);
-            userGroupSubquery.select(userGroupRoot.get(UserGroup.Fields.groupId))
-                    .where(cb.equal(userGroupRoot.get(UserGroup.Fields.userId), userId));
-            predicates.add(cb.not(root.get(Group.Fields.groupId).in(userGroupSubquery)));
-            predicates.add(cb.equal(root.get(Group.Fields.namespaceId), namespaceId));
-            if (StringUtils.hasText(groupName)) {
-                predicates.add(cb.like(
-                        cb.lower(root.get(Group.Fields.groupName)),
-                        "%" + groupName.toLowerCase().trim() + "%"
-                ));
+            if (assignedOnly) {
+                Subquery<String> userGroupSubquery = query.subquery(String.class);
+                Root<UserGroup> userGroupRoot = userGroupSubquery.from(UserGroup.class);
+                userGroupSubquery.select(userGroupRoot.get(UserGroup.Fields.groupId))
+                        .where(cb.equal(userGroupRoot.get(UserGroup.Fields.userId), userId));
+                predicates.add(root.get(Group.Fields.groupId).in(userGroupSubquery));
             }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-    }
-
-    private Specification<Group> buildSpecToFindGroupByUserId(Long userId, String groupName) {
-        return (root, query, cb) -> {
-            assert query != null;
-            List<Predicate> predicates = new ArrayList<>();
-            Subquery<String> userGroupSubquery = query.subquery(String.class);
-            Root<UserGroup> userGroupRoot = userGroupSubquery.from(UserGroup.class);
-            userGroupSubquery.select(userGroupRoot.get(UserGroup.Fields.groupId))
-                    .where(cb.equal(userGroupRoot.get(UserGroup.Fields.userId), userId));
-            predicates.add(root.get(Group.Fields.groupId).in(userGroupSubquery));
             if (StringUtils.hasText(groupName)) {
                 predicates.add(cb.like(
                         cb.lower(root.get(Group.Fields.groupName)),

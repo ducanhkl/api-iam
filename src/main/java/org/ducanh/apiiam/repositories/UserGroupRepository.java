@@ -11,7 +11,9 @@ import java.util.List;
 
 @Repository
 public interface UserGroupRepository extends JpaRepository<UserGroup, Long>, JpaSpecificationExecutor<UserGroup> {
-    List<UserGroup> findAllUserGroupByUserIdAndNamespaceId(Long userId, String namespaceId);
+
+    List<UserGroup> findAllUserGroupsByUserIdAndGroupIdIn(Long userId, List<String> groupIds);
+
 
     @Query("""
         SELECT ug.groupId FROM UserGroup ug

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.requests.AssignGroupsRequestDto;
 import org.ducanh.apiiam.dto.requests.VerifyGroupsRequestDto;
-import org.ducanh.apiiam.dto.responses.GroupResponseDto;
+import org.ducanh.apiiam.dto.responses.UserGroupResponseDto;
 import org.ducanh.apiiam.dto.responses.VerifyUserGroupResponseDto;
 import org.ducanh.apiiam.services.UserGroupService;
 import org.springframework.data.domain.Page;
@@ -16,6 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.ducanh.apiiam.Constants.*;
+import static org.ducanh.apiiam.Constants.TOTAL_PAGES_HEADER;
 
 @RestController
 @RequestMapping("/user-group/")
@@ -35,21 +38,19 @@ public class UserGroupController {
     }
 
     @GetMapping("users/{userId}/groups")
-    public ResponseEntity<Page<GroupResponseDto>> getUserGroups(
+    public ResponseEntity<List<UserGroupResponseDto>> getUserGroups(
             @PathVariable Long userId,
             @RequestParam(required = false) String groupName,
+            @RequestParam(required = false, defaultValue = "false") Boolean assignedOnly,
             @PageableDefault(size = 20) Pageable pageable) {
         log.info("Getting groups for user {} with filter: {}", userId, groupName);
-        return ResponseEntity.ok(userGroupService.getUserGroups(userId, groupName, pageable));
-    }
-
-    @GetMapping("users/{userId}/groups/not-belong")
-    public ResponseEntity<Page<GroupResponseDto>> getGroupsNotBelongToUser(
-            @PathVariable Long userId,
-            @RequestParam(required = false) String groupName,
-            @PageableDefault(size = 20) Pageable pageable) {
-        log.info("Getting groups not belonging to user {} with filter: {}", userId, groupName);
-        return ResponseEntity.ok(userGroupService.getUserGroupsNotBelongToUser(userId, groupName, pageable));
+        Page<UserGroupResponseDto> result = userGroupService.getUserGroups(userId, groupName, assignedOnly, pageable);
+        return ResponseEntity.ok()
+                .header(PAGE_NUMBER_HEADER, String.valueOf(result.getNumber()))
+                .header(PAGE_SIZE_HEADER, String.valueOf(result.getSize()))
+                .header(TOTAL_ELEMENTS_HEADER, String.valueOf(result.getTotalElements()))
+                .header(TOTAL_PAGES_HEADER, String.valueOf(result.getTotalPages()))
+                .body(result.getContent());
     }
 
     @PostMapping("users/{userId}/groups/verify")

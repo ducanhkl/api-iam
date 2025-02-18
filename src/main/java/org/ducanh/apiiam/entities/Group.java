@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldNameConstants;
 import org.ducanh.apiiam.dto.responses.GroupResponseDto;
+import org.ducanh.apiiam.dto.responses.UserGroupResponseDto;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -49,6 +50,17 @@ public class Group {
                 .description(this.description)
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
+                .build();
+    }
+
+    public UserGroupResponseDto userGroupResponseDto(Boolean assigned) {
+        return UserGroupResponseDto.builder()
+                .groupId(this.groupId)
+                .groupName(this.groupName)
+                .description(this.description)
+                .createdAt(this.createdAt)
+                .updatedAt(this.updatedAt)
+                .assigned(assigned)
                 .build();
     }
 }
