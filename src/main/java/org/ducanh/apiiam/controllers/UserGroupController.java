@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.requests.AssignGroupsRequestDto;
+import org.ducanh.apiiam.dto.requests.RemoveUserFromGroupsRequestDto;
 import org.ducanh.apiiam.dto.requests.VerifyGroupsRequestDto;
 import org.ducanh.apiiam.dto.responses.UserGroupResponseDto;
 import org.ducanh.apiiam.dto.responses.VerifyUserGroupResponseDto;
@@ -59,5 +60,14 @@ public class UserGroupController {
             @Valid @RequestBody VerifyGroupsRequestDto request) {
         log.info("Verifying groups for user {}", userId);
         return ResponseEntity.ok(userGroupService.verifyUserGroups(userId, request.groupIds()));
+    }
+
+    @DeleteMapping("users/{userId}/groups/")
+    public ResponseEntity<Void> deleteUserGroups(
+            @PathVariable Long userId,
+            @Valid @RequestBody RemoveUserFromGroupsRequestDto request
+            ) {
+        userGroupService.removeUserFromGroups(userId, request.groupIds());
+        return ResponseEntity.ok().build();
     }
 }

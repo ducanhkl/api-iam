@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -78,6 +79,12 @@ public class UserGroupService {
         return userGroups.stream()
                 .map((userGroup) -> new VerifyUserGroupResponseDto(userGroup.getGroupId(), userGroup.getAssignedAt()))
                 .toList();
+    }
+
+    public void removeUserFromGroups(Long userId, List<String> groupIds) {
+        userRepository.findByUserIdOrThrow(userId);
+        Integer numberOfDeletedRecords = userGroupRepository.removeUserFromGroups(userId, groupIds);
+        log.info(MessageFormat.format("Remove {0} groups from user: {1}", numberOfDeletedRecords, userId));
     }
 
     private Specification<Group> buildSpecToFindGroupByUserId(Long userId, String groupName, Boolean assignedOnly) {
