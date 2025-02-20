@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface RoleRepository extends JpaRepository<Role, String>, JpaSpecificationExecutor<Role> {
     Boolean existsByRoleIdAndNamespaceId(String roleId, String namespaceId);
@@ -17,4 +19,8 @@ public interface RoleRepository extends JpaRepository<Role, String>, JpaSpecific
             throw new RuntimeException("Role existed");
         }
     };
+
+    boolean areAllRolesInNamespace(int size, List<String> roleIds, String namespaceId);
+
+    long countByRoleIdIn(List<String> roleIds);
 }

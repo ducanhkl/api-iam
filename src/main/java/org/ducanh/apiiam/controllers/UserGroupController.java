@@ -4,7 +4,7 @@ package org.ducanh.apiiam.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ducanh.apiiam.dto.requests.AssignGroupsRequestDto;
+import org.ducanh.apiiam.dto.requests.AssignGroupsForUserRequestDto;
 import org.ducanh.apiiam.dto.requests.RemoveUserFromGroupsRequestDto;
 import org.ducanh.apiiam.dto.requests.VerifyGroupsRequestDto;
 import org.ducanh.apiiam.dto.responses.UserGroupResponseDto;
@@ -32,7 +32,7 @@ public class UserGroupController {
     @PostMapping("users/{userId}/groups")
     public ResponseEntity<Void> assignGroupsToUser(
             @PathVariable Long userId,
-            @Valid @RequestBody AssignGroupsRequestDto request) {
+            @Valid @RequestBody AssignGroupsForUserRequestDto request) {
         log.info("Assigning groups {} to user {}", request.groupIds(), userId);
         userGroupService.assignGroupsToUser(userId, request.groupIds());
         return ResponseEntity.ok().build();
