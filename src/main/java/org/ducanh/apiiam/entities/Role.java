@@ -48,11 +48,11 @@ public class Role {
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
-    public static Role from(CreateRoleRequestDto requestDto) {
+    public static Role from(String namespaceId, CreateRoleRequestDto requestDto) {
         return Role.builder()
                 .roleName(requestDto.roleName())
                 .description(requestDto.description())
-                .namespaceId(requestDto.namespaceId())
+                .namespaceId(namespaceId)
                 .build();
     }
 

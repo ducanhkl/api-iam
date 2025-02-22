@@ -33,7 +33,7 @@ public class RoleService {
 
     public CreateRoleResponseDto createRole(String namespaceId, CreateRoleRequestDto requestDto) {
         roleRepository.notExistsByNamespaceIdAndRoleIdOrThrow(requestDto.roleId(), namespaceId);
-        Role role = Role.from(requestDto);
+        Role role = Role.from(namespaceId, requestDto);
         Role savedRole = roleRepository.save(role);
         return savedRole.toCreateResponseDto();
     }

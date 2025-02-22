@@ -10,15 +10,9 @@ import java.util.List;
 
 @Repository
 public interface GroupRoleRepository extends JpaRepository<GroupRole, Long> {
-    List<GroupRole> findAllByNamespaceIdAndGroupIdAndRoleIdIn(String groupId, List<String> roleIds);
-    List<GroupRole> findAllByNamespaceIdAndGroupId(String groupId);
-    List<GroupRole> findAllByRoleId(String roleId);
+    List<GroupRole> findAllByNamespaceIdAndGroupId(String namespaceId, String groupId);
 
     @Modifying
     @Query("DELETE FROM GroupRole gr WHERE gr.namespaceId = :namespaceId AND gr.groupId = :groupId AND gr.roleId IN :roleIds")
     void deleteAllByNamespaceIdAndGroupIdAndRoleIdIn(String namespaceId, String groupId, List<String> roleIds);
-
-    @Modifying
-    @Query("DELETE FROM GroupRole gr WHERE gr.namespaceId = :namespaceId AND gr.groupId = :groupId")
-    void deleteAllByNamespaceIdAndGroupId(String namespaceId, String groupId);
 }

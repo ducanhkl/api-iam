@@ -6,25 +6,25 @@ import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.OffsetDateTime;
 
+
 @Entity
-@Table(name = "group_roles")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldNameConstants
-public class GroupRole {
+public class RolePermission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "group_role_id", nullable = false, updatable = false)
-    private long groupRoleId;
-
-    @Column(name = "group_id", nullable = false)
-    private String groupId;
+    @Column(name = "role_permission_id", nullable = false, updatable = false)
+    private long rolePermissionId;
 
     @Column(name = "role_id", nullable = false)
     private String roleId;
+
+    @Column(name = "permission_id", nullable = false)
+    private String permissionId;
 
     @Column(name = "namespace_id", nullable = false)
     private String namespaceId;

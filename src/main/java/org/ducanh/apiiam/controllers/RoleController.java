@@ -72,7 +72,7 @@ public class RoleController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("role-id/{id}")
+    @DeleteMapping("role-id/{roleId}")
     public ResponseEntity<Void> deleteRole(@PathVariable String roleId,
                                            @PathVariable String namespaceId) {
         log.info("Deleting role with id: {}", roleId);

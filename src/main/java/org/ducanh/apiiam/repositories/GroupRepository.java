@@ -15,7 +15,7 @@ public interface GroupRepository extends JpaRepository<Group, String>, JpaSpecif
     boolean existsAllByNamespaceIdAndGroupIdIn(String namespaceId, List<String> groupIds);
     boolean existsByGroupIdAndNamespaceId(String groupId, String namespaceId);
     default void notExistsByNamespaceIdAndGroupIdOrThrow(String groupId, String namespaceId) {
-        Boolean exists = existsByGroupIdAndNamespaceId(groupId, namespaceId);
+        boolean exists = existsByGroupIdAndNamespaceId(groupId, namespaceId);
         if (exists) {
             throw new RuntimeException("Role existed");
         }

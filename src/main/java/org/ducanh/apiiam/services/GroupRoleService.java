@@ -3,6 +3,7 @@ package org.ducanh.apiiam.services;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.responses.GroupResponseDto;
 import org.ducanh.apiiam.dto.responses.GroupRoleResponseDto;
+import org.ducanh.apiiam.dto.responses.RoleResponseDto;
 import org.ducanh.apiiam.entities.Group;
 import org.ducanh.apiiam.entities.GroupRole;
 import org.ducanh.apiiam.entities.Role;
@@ -51,7 +52,7 @@ public class GroupRoleService {
         }
 
         // Filter out already assigned roles
-        List<String> existingRoleIds = groupRoleRepository.findAllByNamespaceIdAndGroupId(groupId)
+        List<String> existingRoleIds = groupRoleRepository.findAllByNamespaceIdAndGroupId(namespaceId, groupId)
                 .stream()
                 .map(GroupRole::getRoleId)
                 .toList();
@@ -106,18 +107,11 @@ public class GroupRoleService {
         };
 
         return roleRepository.findAll(spec, pageable)
-                .map(role -> {
-                    GroupRole groupRole = groupRoleRepository
-                            .findAllByNamespaceIdAndGroupIdAndRoleIdIn(groupId, List.of(role.getRoleId()))
-                            .getFirst();
-
-                    return GroupRoleResponseDto.builder()
-                            .roleId(role.getRoleId())
-                            .roleName(role.getRoleName())
-                            .description(role.getDescription())
-                            .assignedAt(groupRole.getAssignedAt())
-                            .build();
-                });
+                .map(role -> GroupRoleResponseDto.builder()
+                        .roleId(role.getRoleId())
+                        .roleName(role.getRoleName())
+                        .description(role.getDescription())
+                        .build());
     }
 
     public Page<GroupResponseDto> getRoleGroups(
