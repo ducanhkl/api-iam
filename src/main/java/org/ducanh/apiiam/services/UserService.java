@@ -97,16 +97,16 @@ public class UserService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
-    public UserResponseDto getUser(Long id) {
-        return userRepository.findById(id)
+    public UserResponseDto getUser(Long userId) {
+        return userRepository.findById(userId)
                 .map(User::toUserResponseDto)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
     }
 
     @Transactional
-    public UserResponseDto updateUser(Long id, UpdateUserRequestDto request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    public UserResponseDto updateUser(Long userId, UpdateUserRequestDto request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
         user.setUsername(request.username());
         user.setEmail(request.email());
         user.setPhoneNumber(request.phoneNumber());
@@ -116,9 +116,9 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
         user.setDeleted(true);
     }
 

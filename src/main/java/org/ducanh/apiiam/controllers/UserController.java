@@ -51,25 +51,25 @@ public class UserController {
                 .body(userPage.getContent());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getUser(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUser(id));
+    @GetMapping("/user-id/{userId}")
+    public ResponseEntity<UserResponseDto> getUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUser(userId));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/user-id/{userId}")
     public ResponseEntity<UserResponseDto> updateUser(
-            @PathVariable Long id,
+            @PathVariable Long userId,
             @Valid @RequestBody UpdateUserRequestDto requestDto) {
-        return ResponseEntity.ok(userService.updateUser(id, requestDto));
+        return ResponseEntity.ok(userService.updateUser(userId, requestDto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    @DeleteMapping("/user-id/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+        userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{userId}/password")
+    @PatchMapping("/user-id/{userId}/password")
     public ResponseEntity<UserLoginResponseDto> updatePassword(
             @PathVariable Long userId,
             @Valid @RequestBody UpdatePasswordRequestDto requestDto,
