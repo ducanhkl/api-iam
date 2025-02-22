@@ -41,7 +41,8 @@ public class GroupRoleService {
     }
 
     public void assignRolesToGroup(String namespaceId, String groupId, List<String> roleIds) {
-        Group group = groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, groupId);
+        Group group = groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
 
         // Verify all roles exist using count
         long existingRolesCount = roleRepository.countAllByNamespaceIdAndRoleIdIn(namespaceId, roleIds);

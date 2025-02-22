@@ -11,8 +11,6 @@ public record CreateRoleRequestDto(String roleId,
                                    @Size(max = 100, message = "Role name must not exceed 100 characters")
                                    String roleName,
                                    String description,
-                                   @NotNull(message = "Namespace ID is required")
-                                   String namespaceId,
                                    @NotNull(message = "Created by user ID is required")
                                    Long createdByUserId) {
 }

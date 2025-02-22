@@ -26,7 +26,7 @@ public class GroupRoleController {
 
     private final GroupRoleService groupRoleService;
 
-    @PostMapping("/groups/{groupId}/roles")
+    @PostMapping("/group-id/{groupId}/roles")
     public ResponseEntity<Void> assignRolesToGroup(
             @PathVariable String groupId,
             @PathVariable String namespaceId,
@@ -37,7 +37,7 @@ public class GroupRoleController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/groups/{groupId}/roles")
+    @DeleteMapping("/group-id/{groupId}/roles")
     public ResponseEntity<Void> removeRolesFromGroup(
             @PathVariable String groupId,
             @PathVariable String namespaceId,
@@ -48,7 +48,7 @@ public class GroupRoleController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/groups/{groupId}/roles")
+    @GetMapping("/group-id/{groupId}/roles")
     public ResponseEntity<List<GroupRoleResponseDto>> getGroupRoles(
             @PathVariable String groupId,
             @PathVariable String namespaceId,
@@ -64,7 +64,7 @@ public class GroupRoleController {
                 .body(result.getContent());
     }
 
-    @GetMapping("/roles/{roleId}/groups")
+    @GetMapping("/role-id/{roleId}/groups")
     public ResponseEntity<List<GroupResponseDto>> getRoleGroups(
             @PathVariable String roleId,
             @PathVariable String namespaceId,

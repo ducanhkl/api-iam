@@ -31,8 +31,8 @@ public class RoleService {
         this.roleRepository = roleRepository;
     }
 
-    public CreateRoleResponseDto createRole(CreateRoleRequestDto requestDto) {
-        roleRepository.notExistsByNamespaceIdAndRoleIdOrThrow(requestDto.roleId(), requestDto.namespaceId());
+    public CreateRoleResponseDto createRole(String namespaceId, CreateRoleRequestDto requestDto) {
+        roleRepository.notExistsByNamespaceIdAndRoleIdOrThrow(requestDto.roleId(), namespaceId);
         Role role = Role.from(requestDto);
         Role savedRole = roleRepository.save(role);
         return savedRole.toCreateResponseDto();
@@ -53,25 +53,25 @@ public class RoleService {
         return rolePage.map(Role::toResponseDto);
     }
 
-    public RoleResponseDto getRole(String id) {
-        Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Role not found with id: " + id));
+    public RoleResponseDto getRole(String namespaceId, String roleId) {
+        Role role = roleRepository.findROleByNamespaceIdAndRoleId(namespaceId, roleId)
+                .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
         return role.toResponseDto();
     }
 
     @Transactional
-    public UpdateRoleResponseDto updateRole(String id, UpdateRoleRequestDto requestDto) {
-        Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Role not found with id: " + id));
+    public UpdateRoleResponseDto updateRole(String namespaceId, String roleId, UpdateRoleRequestDto requestDto) {
+        Role role = roleRepository.findROleByNamespaceIdAndRoleId(namespaceId, roleId)
+                .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
         role.update(requestDto);
         return role.toUpdateResponseDto();
     }
 
-    public void deleteRole(String id) {
-        if (!roleRepository.existsById(id)) {
-            throw new RuntimeException("Role not found with id: " + id);
-        }
-        roleRepository.deleteById(id);
+    @Transactional
+    public void deleteRole(String namespaceId, String roleId) {
+        Role role = roleRepository.findROleByNamespaceIdAndRoleId(namespaceId, roleId)
+                .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+        roleRepository.delete(role);
     }
 
 }

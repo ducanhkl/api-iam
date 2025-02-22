@@ -14,9 +14,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import static org.ducanh.apiiam.helpers.ValidationHelpers.valArg;
 
 @Service
 @Slf4j
@@ -29,12 +34,12 @@ public class GroupService {
         this.groupRepository = groupRepository;
     }
 
-    public GroupResponseDto createGroup(CreateGroupRequestDto request) {
-        groupRepository.notExistsByNamespaceIdAndGroupIdOrThrow(request.groupId(), request.namespaceId());
+    public GroupResponseDto createGroup(String namespaceId, CreateGroupRequestDto request) {
+        groupRepository.notExistsByNamespaceIdAndGroupIdOrThrow(request.groupId(), namespaceId);
         Group group = Group.builder()
                 .groupName(request.groupName())
                 .description(request.description())
-                .namespaceId(request.namespaceId())
+                .namespaceId(namespaceId)
                 .groupId(request.groupId())
                 .build();
 
@@ -43,19 +48,19 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupResponseDto updateGroup(String id, UpdateGroupRequestDto request) {
-        Group group = groupRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Group not found with id: " + id));
+    public GroupResponseDto updateGroup(String namespaceId, String groupId, UpdateGroupRequestDto request) {
+        Group group = groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found with id: " + groupId));
         group.setGroupName(request.groupName());
         group.setDescription(request.description());
-        // updatedAt is automatically handled by @UpdateTimestamp
         return group.toGroupResponseDto();
     }
 
-    public GroupResponseDto getGroup(String id) {
-        return groupRepository.findById(id)
+    public GroupResponseDto getGroup(String namespaceId,
+                                     String groupId) {
+        return groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, groupId)
                 .map(Group::toGroupResponseDto)
-                .orElseThrow(() -> new RuntimeException("Group not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Group not found with id: " + groupId));
     }
 
     public Page<GroupResponseDto> indexGroups(String namespaceId, String groupName, Pageable pageable) {
@@ -63,8 +68,8 @@ public class GroupService {
                 .map(Group::toGroupResponseDto);
     }
 
-    public void deleteGroup(String id) {
-        Group group = groupRepository.findById(id)
+    public void deleteGroup(String namespaceId, String id) {
+        Group group = groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, id)
                 .orElseThrow(() -> new RuntimeException("Group not found with id: " + id));
         groupRepository.delete(group);
     }

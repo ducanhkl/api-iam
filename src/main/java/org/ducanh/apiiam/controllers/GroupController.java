@@ -19,7 +19,7 @@ import static org.ducanh.apiiam.Constants.*;
 
 
 @RestController
-@RequestMapping("/group")
+@RequestMapping("/group/namespace-id/{namespaceId}")
 @RequiredArgsConstructor
 @Slf4j
 public class GroupController {
@@ -28,15 +28,17 @@ public class GroupController {
 
     @PostMapping
     public ResponseEntity<GroupResponseDto> createGroup(
-            @RequestBody CreateGroupRequestDto request) {
+            @RequestBody CreateGroupRequestDto request,
+            @PathVariable String namespaceId) {
         log.info("Creating group: {}", request);
-        GroupResponseDto response = groupService.createGroup(request);
+        GroupResponseDto response = groupService.createGroup(namespaceId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<GroupResponseDto> getGroup(@PathVariable String id) {
-        GroupResponseDto response = groupService.getGroup(id);
+    @GetMapping("group-id/{id}")
+    public ResponseEntity<GroupResponseDto> getGroup(@PathVariable String id,
+                                                     @PathVariable String namespaceId) {
+        GroupResponseDto response = groupService.getGroup(namespaceId, id);
         return ResponseEntity.ok(response);
     }
 
@@ -58,17 +60,19 @@ public class GroupController {
                 .body(groupPage.getContent());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("group-id/{id}")
     public ResponseEntity<GroupResponseDto> updateGroup(
             @PathVariable String id,
+            @PathVariable String namespaceId,
             @RequestBody UpdateGroupRequestDto request) {
-        GroupResponseDto response = groupService.updateGroup(id, request);
+        GroupResponseDto response = groupService.updateGroup(namespaceId, id, request);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGroup(@PathVariable String id) {
-        groupService.deleteGroup(id);
+    @DeleteMapping("group-id/{groupId}")
+    public ResponseEntity<Void> deleteGroup(@PathVariable String namespaceId,
+                                            @PathVariable String groupId) {
+        groupService.deleteGroup(namespaceId, groupId);
         return ResponseEntity.noContent().build();
     }
 }

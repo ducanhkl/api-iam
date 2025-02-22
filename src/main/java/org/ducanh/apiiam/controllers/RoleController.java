@@ -21,22 +21,24 @@ import java.util.List;
 import static org.ducanh.apiiam.Constants.*;
 
 @RestController
-@RequestMapping("role")
+@RequestMapping("role/namespace-id/{namespaceId}")
 @Slf4j
 @RequiredArgsConstructor
 public class RoleController {
     private final RoleService roleService;
 
     @PostMapping
-    public ResponseEntity<CreateRoleResponseDto> createRole(@Valid @RequestBody CreateRoleRequestDto requestDto) {
+    public ResponseEntity<CreateRoleResponseDto> createRole(
+            @Valid @RequestBody CreateRoleRequestDto requestDto,
+            @PathVariable String namespaceId) {
         log.info("Creating new role: {}", requestDto);
-        CreateRoleResponseDto response = roleService.createRole(requestDto);
+        CreateRoleResponseDto response = roleService.createRole(namespaceId, requestDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
 
-    @GetMapping("namespace/{namespaceId}/index")
+    @GetMapping("index")
     public ResponseEntity<List<RoleResponseDto>> getRoles(
             @RequestParam(required = false) String roleName,
             @RequestParam(defaultValue = "0") int page,
@@ -53,26 +55,28 @@ public class RoleController {
                 .body(rolePage.getContent());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<RoleResponseDto> getRole(@PathVariable String id) {
-        log.info("Fetching role with id: {}", id);
-        RoleResponseDto response = roleService.getRole(id);
+    @GetMapping("role-id/{roleId}")
+    public ResponseEntity<RoleResponseDto> getRole(@PathVariable String roleId, @PathVariable String namespaceId) {
+        log.info("Fetching role with id: {}", roleId);
+        RoleResponseDto response = roleService.getRole(namespaceId, roleId);
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("role-id/{roleId}")
     public ResponseEntity<UpdateRoleResponseDto> updateRole(
-            @PathVariable String id,
+            @PathVariable String roleId,
+            @PathVariable String namespaceId,
             @Valid @RequestBody UpdateRoleRequestDto requestDto) {
-        log.info("Updating role with id: {}", id);
-        UpdateRoleResponseDto response = roleService.updateRole(id, requestDto);
+        log.info("Updating role with id: {}", roleId);
+        UpdateRoleResponseDto response = roleService.updateRole(namespaceId, roleId, requestDto);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRole(@PathVariable String id) {
-        log.info("Deleting role with id: {}", id);
-        roleService.deleteRole(id);
+    @DeleteMapping("role-id/{id}")
+    public ResponseEntity<Void> deleteRole(@PathVariable String roleId,
+                                           @PathVariable String namespaceId) {
+        log.info("Deleting role with id: {}", roleId);
+        roleService.deleteRole(namespaceId, roleId);
         return ResponseEntity.noContent().build();
     }
 }

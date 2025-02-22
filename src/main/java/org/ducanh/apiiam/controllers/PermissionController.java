@@ -7,7 +7,7 @@ import org.ducanh.apiiam.dto.requests.CreatePermissionRequestDto;
 import org.ducanh.apiiam.dto.requests.IndexPermissionRequestParamsDto;
 import org.ducanh.apiiam.dto.requests.UpdatePermissionRequestDto;
 import org.ducanh.apiiam.dto.responses.PermissionResponseDto;
-import org.ducanh.apiiam.entities.PermissionService;
+import org.ducanh.apiiam.services.PermissionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +21,7 @@ import static org.ducanh.apiiam.Constants.*;
 
 
 @RestController
-@RequestMapping("permission")
+@RequestMapping("permission/namespace-id/{namespaceId}/")
 @RequiredArgsConstructor
 @Slf4j
 public class PermissionController {
@@ -30,19 +30,21 @@ public class PermissionController {
 
     @PostMapping
     public ResponseEntity<PermissionResponseDto> createPermission(
-            @Valid @RequestBody CreatePermissionRequestDto request) {
+            @Valid @RequestBody CreatePermissionRequestDto request,
+            @PathVariable String namespaceId) {
         log.info("Creating permission: {}", request);
-        PermissionResponseDto response = permissionService.createPermission(request);
+        PermissionResponseDto response = permissionService.createPermission(namespaceId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PermissionResponseDto> getPermission(@PathVariable String id) {
-        PermissionResponseDto response = permissionService.getPermission(id);
+    @GetMapping("permission-id/{permissionId}")
+    public ResponseEntity<PermissionResponseDto> getPermission(@PathVariable String permissionId,
+                                                               @PathVariable String namespaceId) {
+        PermissionResponseDto response = permissionService.getPermission(namespaceId, permissionId);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/namespace/{namespaceId}/index")
+    @GetMapping("/index")
     public ResponseEntity<List<PermissionResponseDto>> indexPermissions(
             @PathVariable String namespaceId,
             IndexPermissionRequestParamsDto params) {
@@ -57,17 +59,19 @@ public class PermissionController {
                 .body(permissionPage.getContent());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("permission-id/{permissionId}")
     public ResponseEntity<PermissionResponseDto> updatePermission(
-            @PathVariable String id,
+            @PathVariable String permissionId,
+            @PathVariable String namespaceId,
             @Valid @RequestBody UpdatePermissionRequestDto request) {
-        PermissionResponseDto response = permissionService.updatePermission(id, request);
+        PermissionResponseDto response = permissionService.updatePermission(namespaceId, permissionId, request);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePermission(@PathVariable String id) {
-        permissionService.deletePermission(id);
+    @DeleteMapping("permission-id/{permissionId}")
+    public ResponseEntity<Void> deletePermission(@PathVariable String permissionId,
+                                                 @PathVariable String namespaceId) {
+        permissionService.deletePermission(namespaceId, permissionId);
         return ResponseEntity.noContent().build();
     }
 }

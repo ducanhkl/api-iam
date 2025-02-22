@@ -5,6 +5,5 @@ import lombok.Builder;
 @Builder
 public record CreateGroupRequestDto(String groupId,
                                     String groupName,
-                                    String description,
-                                    String namespaceId) {
+                                    String description) {
 }

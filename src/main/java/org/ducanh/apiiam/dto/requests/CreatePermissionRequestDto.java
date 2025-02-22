@@ -8,6 +8,5 @@ public record CreatePermissionRequestDto(@NotBlank(message = "Permission ID is r
                                          @NotBlank(message = "Permission name is required")
                                          @Size(max = 100, message = "Permission name must not exceed 100 characters")
                                          String permissionName,
-                                         String namespaceId,
                                          String description) {
 }

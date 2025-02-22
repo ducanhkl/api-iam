@@ -8,9 +8,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, String>, JpaSpecificationExecutor<Role> {
+
+    Optional<Role> findROleByNamespaceIdAndRoleId(String namespaceId, String roleId);
     Boolean existsByRoleIdAndNamespaceId(String roleId, String namespaceId);
 
     default void notExistsByNamespaceIdAndRoleIdOrThrow(String roleId, String namespaceId) {

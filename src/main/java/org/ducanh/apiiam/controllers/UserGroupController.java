@@ -29,7 +29,7 @@ public class UserGroupController {
 
     private final UserGroupService userGroupService;
 
-    @PostMapping("users/{userId}/groups")
+    @PostMapping("user-id/{userId}/groups")
     public ResponseEntity<Void> assignGroupsToUser(
             @PathVariable Long userId,
             @Valid @RequestBody AssignGroupsForUserRequestDto request) {
@@ -38,7 +38,7 @@ public class UserGroupController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("users/{userId}/groups")
+    @GetMapping("user-id/{userId}/groups")
     public ResponseEntity<List<UserGroupResponseDto>> getUserGroups(
             @PathVariable Long userId,
             @RequestParam(required = false) String groupName,
@@ -54,7 +54,7 @@ public class UserGroupController {
                 .body(result.getContent());
     }
 
-    @PostMapping("users/{userId}/groups/verify")
+    @PostMapping("user-id/{userId}/groups/verify")
     public ResponseEntity<List<VerifyUserGroupResponseDto>> verifyUserGroups(
             @PathVariable Long userId,
             @Valid @RequestBody VerifyGroupsRequestDto request) {
@@ -62,7 +62,7 @@ public class UserGroupController {
         return ResponseEntity.ok(userGroupService.verifyUserGroups(userId, request.groupIds()));
     }
 
-    @DeleteMapping("users/{userId}/groups/")
+    @DeleteMapping("user-id/{userId}/groups/")
     public ResponseEntity<Void> deleteUserGroups(
             @PathVariable Long userId,
             @Valid @RequestBody RemoveUserFromGroupsRequestDto request
