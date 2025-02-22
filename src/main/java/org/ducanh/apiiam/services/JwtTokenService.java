@@ -2,6 +2,7 @@ package org.ducanh.apiiam.services;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.ducanh.apiiam.dto.responses.UserLoginResponseDto;
 import org.ducanh.apiiam.entities.JwtTokenType;
@@ -25,6 +26,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Base64;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.ducanh.apiiam.Constants.*;
@@ -71,6 +73,12 @@ public class JwtTokenService {
     public DecodedJWT validateRefreshToken(String refreshToken) {
         DecodedJWT decodedJWT = JWT.decode(refreshToken);
         KeyPair keyPair = keyPairRepository.findKeyPairsByKeyPairId(Long.valueOf(decodedJWT.getKeyId()));
+        String tokenType = Optional.of(decodedJWT.getClaim(TOKEN_TYPE))
+                .map(Claim::asString)
+                .orElseThrow(() -> new RuntimeException("Token type not existed"));
+        if (!tokenType.equals(JwtTokenType.REFRESH_TOKEN.toString())) {
+            throw new RuntimeException("Refresh token does not match expected token type");
+        }
         try {
             return JWT.require(getVerifyAlgorithm(keyPair))
                     .build()

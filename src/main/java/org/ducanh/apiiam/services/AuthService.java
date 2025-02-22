@@ -41,7 +41,6 @@ public class AuthService {
                        NamespaceRepository namespaceRepository,
                        OtpService otpService,
                        SessionService sessionService,
-                       KeyPairRepository keyPairRepository,
                        JwtTokenService jwtTokenService,
                        SessionRepository sessionRepository, TimeHelpers timeHelpers) {
         this.userRepository = userRepository;
