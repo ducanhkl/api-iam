@@ -27,10 +27,10 @@ import java.time.OffsetDateTime;
 public class Namespace {
 
     @Id
-    @Column(name = "namespace_id", nullable = false, updatable = false)
+    @Column(name = "namespace_id", unique = true)
     private String namespaceId;
 
-    @Column(name = "name", nullable = false, unique = true, length = 100)
+    @Column(name = "name", length = 100)
     private String namespaceName;
 
     @Column(name = "description", length = 255)

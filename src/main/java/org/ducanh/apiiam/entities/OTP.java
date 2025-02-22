@@ -1,13 +1,6 @@
 package org.ducanh.apiiam.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,37 +32,42 @@ public class OTP {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generate primary key
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "otp_id_seq")
+    @SequenceGenerator(
+            name = "otp_id_seq",
+            sequenceName = "otp_id_seq",
+            allocationSize = 100
+    )
     @Column(name = "otp_id") // Explicit column name
     private Long otpId;
 
-    @Column(name = "user_id", nullable = false) // Explicit column name
+    @Column(name = "user_id") // Explicit column name
     private Long userId;
 
-    @Column(name = "namespace_id", nullable = false) // Explicit column name
+    @Column(name = "namespace_id") // Explicit column name
     private String namespaceId;
 
-    @Column(name = "code", nullable = false, length = 10) // Explicit column name
+    @Column(name = "code", length = 10) // Explicit column name
     private String code;
 
-    @Column(name = "expired_at", nullable = false) // Explicit column name
+    @Column(name = "expired_at") // Explicit column name
     private OffsetDateTime expiredAt;
 
-    @Column(name = "used", nullable = false) // Explicit column name
+    @Column(name = "used") // Explicit column name
     private Boolean used;
 
-    @Column(name = "type", nullable = false, length = 20) // Explicit column name
+    @Column(name = "type", length = 20) // Explicit column name
     @Enumerated(EnumType.STRING)
     private Type type;
 
-    @Column(name = "method", nullable = false, length = 10) // Explicit column name
+    @Column(name = "method", length = 10) // Explicit column name
     @Enumerated(EnumType.STRING)
     private Method method;
 
-    @Column(name = "retries", nullable = false) // Explicit column name
+    @Column(name = "retries") // Explicit column name
     private int retries;
 
-    @Column(name = "is_verified", nullable = false) // Explicit column name
+    @Column(name = "is_verified") // Explicit column name
     private boolean isVerified;
 
     @Column(name = "email") // Explicit column name

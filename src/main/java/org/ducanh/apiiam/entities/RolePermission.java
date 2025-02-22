@@ -15,18 +15,24 @@ import java.time.OffsetDateTime;
 @Builder
 @FieldNameConstants
 public class RolePermission {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_permission_id", nullable = false, updatable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_permission_id_seq")
+    @SequenceGenerator(
+            name = "role_permission_id_seq",
+            sequenceName = "role_permission_id_seq",
+            allocationSize = 100
+    )
+    @Column(name = "role_permission_id")
     private long rolePermissionId;
 
-    @Column(name = "role_id", nullable = false)
+    @Column(name = "role_id")
     private String roleId;
 
-    @Column(name = "permission_id", nullable = false)
+    @Column(name = "permission_id")
     private String permissionId;
 
-    @Column(name = "namespace_id", nullable = false)
+    @Column(name = "namespace_id")
     private String namespaceId;
 
     @Column(name = "assigned_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")

@@ -28,19 +28,19 @@ import java.time.OffsetDateTime;
 public class Role {
 
     @Id
-    @Column(name = "ROLE_ID", nullable = false, updatable = false)
+    @Column(name = "ROLE_ID", length = 100, unique = true)
     private String roleId;
 
-    @Column(name = "ROLE_NAME", nullable = false, length = 100)
+    @Column(name = "ROLE_NAME", length = 100)
     private String roleName;
 
     @Column(name = "DESCRIPTION", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "NAMESPACE_ID", nullable = false)
+    @Column(name = "NAMESPACE_ID")
     private String namespaceId;
 
-    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
     private OffsetDateTime createdAt;
 

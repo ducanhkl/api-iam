@@ -35,34 +35,34 @@ public class KeyPair {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generate the primary key
-    @Column(name = "key_id", nullable = false, updatable = false)
+    @Column(name = "key_id")
     private Long keyPairId; // Primary Key
 
-    @Column(name = "kid", nullable = false, unique = true, length = 100)
+    @Column(name = "kid", length = 100)
     private String kid; // Unique Key Identifier
 
-    @Column(name = "public_key", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "public_key", columnDefinition = "TEXT")
     private String publicKey; // Public Key Value
 
-    @Column(name = "encrypted_private_key", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "encrypted_private_key", columnDefinition = "TEXT")
     private String encryptedPrivateKey;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active")
     private Boolean isActive; // Indicates if the key is active
 
-    @Column(name = "algorithm", nullable = false, length = 100)
+    @Column(name = "algorithm", length = 100)
     private Algorithm algorithm; // Algorithm used for the public key (e.g., "RSA", "ECDSA")
 
-    @Column(name = "key_usage", nullable = false, length = 50)
+    @Column(name = "key_usage", length = 50)
     private KeyUsage keyUsage; // Usage of the key (e.g., "SIGNATURE", "ENCRYPTION")
 
     @Column(name = "key_rotation_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime keyRotationDate;
 
-    @Column(name = "key_status", nullable = false, length = 50)
+    @Column(name = "key_status", length = 50)
     private String keyStatus;
 
-    @Column(name = "key_version", nullable = false)
+    @Column(name = "key_version")
     private Integer keyVersion; // Version number of the key
 
     @Column(name = "expiry_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")

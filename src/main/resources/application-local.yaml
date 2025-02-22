@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ducanh
+    username: ducanh
+    password: ducanh
+    hikari:
+      schema: public
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+logging:
+  level:
+    com.zaxxer.hikari: DEBUG
+    com.zaxxer.hikari.HikariConfig: TRACE

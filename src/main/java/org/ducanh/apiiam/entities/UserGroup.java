@@ -18,17 +18,22 @@ import java.time.OffsetDateTime;
 public class UserGroup {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_group_id", nullable = false, updatable = false)
-    private long userGroupId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_group_id_seq")
+    @SequenceGenerator(
+            name = "user_group_id_seq",
+            sequenceName = "user_group_id_seq",
+            allocationSize = 100
+    )
+    @Column(name = "user_group_id", unique = true)
+    private Long userGroupId;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "group_id", nullable = false, length = 50)
+    @Column(name = "group_id", length = 50)
     private String groupId;
 
-    @Column(name = "namespace_id", nullable = false, length = 50)
+    @Column(name = "namespace_id", length = 50)
     private String namespaceId;
 
     @Column(name = "assigned_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")

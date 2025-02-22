@@ -13,22 +13,22 @@ public class PasswordPolicy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "policy_id", nullable = false, updatable = false)
+    @Column(name = "policy_id", unique = true)
     private Integer policyId;
 
-    @Column(name = "policy_name", nullable = false, unique = true, length = 100)
+    @Column(name = "policy_name", length = 100)
     private String policyName;
 
     @Column(name = "description", length = 255)
     private String description;
 
-    @Column(name = "namespace_id", nullable = false)
+    @Column(name = "namespace_id")
     private Integer namespaceId;
 
-    @Column(name = "max_age", nullable = false)
+    @Column(name = "max_age")
     private Integer maxAge;
 
-    @Column(name = "min_strength", nullable = false)
+    @Column(name = "min_strength")
     private Integer minStrength;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")

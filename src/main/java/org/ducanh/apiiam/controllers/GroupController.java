@@ -42,7 +42,7 @@ public class GroupController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/namespace/{namespaceId}/index")
+    @GetMapping("/index")
     public ResponseEntity<List<GroupResponseDto>> indexGroups(
             @RequestParam(required = false) String groupName,
             @RequestParam(defaultValue = "0") int page,

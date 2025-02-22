@@ -1,14 +1,7 @@
 package org.ducanh.apiiam.entities;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,32 +30,37 @@ public class Session {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "sessionId", nullable = false, updatable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sessions_id_seq")
+    @SequenceGenerator(
+            name = "sessions_id_seq",
+            sequenceName = "sessions_id_seq",
+            allocationSize = 100
+    )
+    @Column(name = "sessionId")
     private Long sessionId;
 
-    @Column(name = "access_token_id", nullable = false, unique = true)
+    @Column(name = "access_token_id")
     private String accessTokenId;
 
-    @Column(name = "refresh_token_id", nullable = false, unique = true)
+    @Column(name = "refresh_token_id")
     private String refreshTokenId;
 
-    @Column(name = "refreshTokenIssueAt", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @Column(name = "refreshTokenIssueAt", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime refreshTokenIssueAt;
 
-    @Column(name = "refreshTokenExpiredAt", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @Column(name = "refreshTokenExpiredAt", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime refreshTokenExpiredAt;
 
-    @Column(name = "revoked", nullable = false)
+    @Column(name = "revoked")
     private boolean revoked;
 
-    @Column(name = "active", nullable = false)
+    @Column(name = "active")
     private boolean active;
 
-    @Column(name = "userId", nullable = false)
+    @Column(name = "userId")
     private Long userId;
 
-    @Column(name = "namespaceId", nullable = false)
+    @Column(name = "namespaceId")
     private String namespaceId;
 
     @Column(name = "userAgent", length = 512)
@@ -74,7 +72,7 @@ public class Session {
     @Column(name = "kid", length = 100)
     private String kid; // Key ID for JWT signing key used
 
-    @Column(name = "sessionType", nullable = false, length = 20)
+    @Column(name = "sessionType", length = 20)
     @Enumerated(EnumType.STRING)
     private SessionType sessionType;
 

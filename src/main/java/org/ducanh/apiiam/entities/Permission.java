@@ -18,10 +18,10 @@ import java.time.OffsetDateTime;
 @FieldNameConstants
 public class Permission {
     @Id
-    @Column(name = "permission_id", nullable = false, updatable = false)
+    @Column(name = "permission_id", unique = true)
     private String permissionId;
 
-    @Column(name = "permission_name", nullable = false, unique = true, length = 100)
+    @Column(name = "permission_name", length = 100)
     private String permissionName;
 
     @Column(name = "description", columnDefinition = "TEXT")

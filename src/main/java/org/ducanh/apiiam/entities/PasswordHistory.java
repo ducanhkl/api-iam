@@ -1,11 +1,6 @@
 package org.ducanh.apiiam.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,13 +13,18 @@ import java.time.OffsetDateTime;
 public class PasswordHistory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "history_id_seq")
+    @SequenceGenerator(
+            name = "history_id_seq",
+            sequenceName = "history_id_seq",
+            allocationSize = 100
+    )
     private Integer historyId;
 
     @Column(name = "user_id")
     private Integer userId;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
+    @Column(name = "password_hash", length = 255)
     private String passwordHash;
 
     @Column(name = "pwd_alg", length = 50)

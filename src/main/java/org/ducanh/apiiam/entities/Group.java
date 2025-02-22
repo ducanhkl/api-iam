@@ -23,10 +23,10 @@ import java.time.OffsetDateTime;
 public class Group {
 
     @Id
-    @Column(name = "group_id", nullable = false, updatable = false)
+    @Column(name = "group_id", length = 100, unique = true)
     private String groupId;
 
-    @Column(name = "group_name", nullable = false, unique = true, length = 100)
+    @Column(name = "group_name", length = 100)
     private String groupName;
 
     @Column(name = "description", columnDefinition = "TEXT")

@@ -16,17 +16,22 @@ import java.time.OffsetDateTime;
 @FieldNameConstants
 public class GroupRole {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "group_role_id", nullable = false, updatable = false)
-    private long groupRoleId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_role_id_seq")
+    @SequenceGenerator(
+            name = "group_role_id_seq",
+            sequenceName = "group_role_id_seq",
+            allocationSize = 100
+    )
+    @Column(name = "group_role_id")
+    private Long groupRoleId;
 
-    @Column(name = "group_id", nullable = false)
+    @Column(name = "group_id")
     private String groupId;
 
-    @Column(name = "role_id", nullable = false)
+    @Column(name = "role_id")
     private String roleId;
 
-    @Column(name = "namespace_id", nullable = false)
+    @Column(name = "namespace_id")
     private String namespaceId;
 
     @Column(name = "assigned_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")

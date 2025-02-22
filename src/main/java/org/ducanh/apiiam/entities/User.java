@@ -1,13 +1,7 @@
 package org.ducanh.apiiam.entities;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,46 +27,51 @@ import java.time.OffsetDateTime;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id", nullable = false, updatable = false)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_seq")
+    @SequenceGenerator(
+            name = "user_id_seq",
+            sequenceName = "user_id_seq",
+            allocationSize = 100
+    )
+    @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "username", nullable = false, unique = true, length = 50)
+    @Column(name = "username", length = 50)
     private String username;
 
-    @Column(name = "email", nullable = false, unique = true, length = 100)
+    @Column(name = "email", length = 100)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
+    @Column(name = "password_hash", length = 255)
     private String passwordHash;
 
     @Column(name = "pwd_alg", length = 50)
     @Enumerated(jakarta.persistence.EnumType.STRING)
     private PasswordAlg pwdAlg;
 
-    @Column(name = "is_verified", nullable = false)
+    @Column(name = "is_verified")
     private Boolean isVerified;
 
-    @Column(name = "deleted", nullable = false)
-    private Boolean deleted = false;
+    @Column(name = "deleted")
+    private Boolean deleted;
 
     @Column(name = "namespace_id")
     private String namespaceId;
 
-    @Column(name = "status", length = 50)
+    @Column(name = "status")
     @Enumerated(jakarta.persistence.EnumType.STRING)
     private UserStatus status;
 
     @Column(name = "last_login", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime lastLogin;
 
-    @Column(name = "mfa_enabled", nullable = false)
+    @Column(name = "mfa_enabled")
     private Boolean mfaEnabled;
 
     @Column(name = "mfa_secret", length = 255)
     private String mfaSecret;
 
-    @Column(name = "account_locked", nullable = false)
+    @Column(name = "account_locked")
     private Boolean accountLocked;
 
     @Column(name = "phone_number", length = 15)
