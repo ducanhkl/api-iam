@@ -22,5 +22,5 @@ public interface RoleRepository extends JpaRepository<Role, String>, JpaSpecific
 
     boolean areAllRolesInNamespace(int size, List<String> roleIds, String namespaceId);
 
-    long countByRoleIdIn(List<String> roleIds);
+    long countAllByNamespaceIdAndRoleIdIn(String namespaceId, List<String> roleIds);
 }

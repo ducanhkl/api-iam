@@ -10,21 +10,15 @@ import java.util.List;
 
 @Repository
 public interface GroupRoleRepository extends JpaRepository<GroupRole, Long> {
-    List<GroupRole> findAllByGroupIdAndRoleIdIn(String groupId, List<String> roleIds);
-    List<GroupRole> findAllByGroupId(String groupId);
+    List<GroupRole> findAllByNamespaceIdAndGroupIdAndRoleIdIn(String groupId, List<String> roleIds);
+    List<GroupRole> findAllByNamespaceIdAndGroupId(String groupId);
     List<GroupRole> findAllByRoleId(String roleId);
 
     @Modifying
-    @Query("DELETE FROM GroupRole gr WHERE gr.groupId = ?1 AND gr.roleId IN ?2")
-    void deleteAllByGroupIdAndRoleIdIn(String groupId, List<String> roleIds);
+    @Query("DELETE FROM GroupRole gr WHERE gr.namespaceId = :namespaceId AND gr.groupId = :groupId AND gr.roleId IN :roleIds")
+    void deleteAllByNamespaceIdAndGroupIdAndRoleIdIn(String namespaceId, String groupId, List<String> roleIds);
 
     @Modifying
-    @Query("DELETE FROM GroupRole gr WHERE gr.groupId = ?1")
-    void deleteAllByGroupId(String groupId);
-
-    @Modifying
-    @Query("DELETE FROM GroupRole gr WHERE gr.roleId = ?1")
-    void deleteAllByRoleId(String roleId);
-
-    boolean existsByGroupIdAndRoleId(String groupId, String roleId);
+    @Query("DELETE FROM GroupRole gr WHERE gr.namespaceId = :namespaceId AND gr.groupId = :groupId")
+    void deleteAllByNamespaceIdAndGroupId(String namespaceId, String groupId);
 }

@@ -40,23 +40,17 @@ public class GroupRoleService {
         this.roleRepository = roleRepository;
     }
 
-    public void assignRolesToGroup(String groupId, List<String> roleIds) {
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
+    public void assignRolesToGroup(String namespaceId, String groupId, List<String> roleIds) {
+        Group group = groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, groupId);
 
         // Verify all roles exist using count
-        long existingRolesCount = roleRepository.countByRoleIdIn(roleIds);
+        long existingRolesCount = roleRepository.countAllByNamespaceIdAndRoleIdIn(namespaceId, roleIds);
         if (existingRolesCount != roleIds.size()) {
             throw new RuntimeException("One or more roles not found");
         }
 
-        // Verify all roles are in the same namespace
-        if (!roleRepository.areAllRolesInNamespace(roleIds.size(), roleIds, group.getNamespaceId())) {
-            throw new RuntimeException("All roles must be in the same namespace as the group");
-        }
-
         // Filter out already assigned roles
-        List<String> existingRoleIds = groupRoleRepository.findAllByGroupId(groupId)
+        List<String> existingRoleIds = groupRoleRepository.findAllByNamespaceIdAndGroupId(groupId)
                 .stream()
                 .map(GroupRole::getRoleId)
                 .toList();
@@ -73,14 +67,15 @@ public class GroupRoleService {
         groupRoleRepository.saveAll(newGroupRoles);
     }
 
-    public void removeRolesFromGroup(String groupId, List<String> roleIds) {
-        if (!groupRepository.existsById(groupId)) {
+    public void removeRolesFromGroup(String namespaceId, String groupId, List<String> roleIds) {
+        if (!groupRepository.existsByGroupIdAndNamespaceId(groupId, namespaceId)) {
             throw new RuntimeException("Group not found");
         }
-        groupRoleRepository.deleteAllByGroupIdAndRoleIdIn(groupId, roleIds);
+        groupRoleRepository.deleteAllByNamespaceIdAndGroupIdAndRoleIdIn(namespaceId, groupId, roleIds);
     }
 
     public Page<GroupRoleResponseDto> getGroupRoles(
+            String namespaceId,
             String groupId,
             String roleName,
             Pageable pageable
@@ -94,14 +89,14 @@ public class GroupRoleService {
             List<Predicate> predicates = new ArrayList<>();
             Subquery<String> groupRoleSubquery = query.subquery(String.class);
             Root<GroupRole> groupRoleRoot = groupRoleSubquery.from(GroupRole.class);
-            groupRoleSubquery.select(groupRoleRoot.get("roleId"))
-                    .where(cb.equal(groupRoleRoot.get("groupId"), groupId));
-
-            predicates.add(root.get("roleId").in(groupRoleSubquery));
-
+            groupRoleSubquery.select(groupRoleRoot.get(GroupRole.Fields.roleId))
+                    .where(cb.and(cb.equal(groupRoleRoot.get(GroupRole.Fields.groupId), groupId),
+                            cb.equal(groupRoleRoot.get(GroupRole.Fields.namespaceId), namespaceId)));
+            predicates.add(root.get(Role.Fields.roleId).in(groupRoleSubquery));
+            predicates.add(cb.equal(root.get(Role.Fields.namespaceId), namespaceId));
             if (StringUtils.hasText(roleName)) {
                 predicates.add(cb.like(
-                        cb.lower(root.get("roleName")),
+                        cb.lower(root.get(Role.Fields.roleName)),
                         "%" + roleName.toLowerCase().trim() + "%"
                 ));
             }
@@ -112,7 +107,7 @@ public class GroupRoleService {
         return roleRepository.findAll(spec, pageable)
                 .map(role -> {
                     GroupRole groupRole = groupRoleRepository
-                            .findAllByGroupIdAndRoleIdIn(groupId, List.of(role.getRoleId()))
+                            .findAllByNamespaceIdAndGroupIdAndRoleIdIn(groupId, List.of(role.getRoleId()))
                             .getFirst();
 
                     return GroupRoleResponseDto.builder()
@@ -125,6 +120,7 @@ public class GroupRoleService {
     }
 
     public Page<GroupResponseDto> getRoleGroups(
+            String namespaceId,
             String roleId,
             String groupName,
             Pageable pageable
@@ -140,15 +136,14 @@ public class GroupRoleService {
             Root<GroupRole> groupRoleRoot = groupRoleSubquery.from(GroupRole.class);
             groupRoleSubquery.select(groupRoleRoot.get(GroupRole.Fields.groupId))
                     .where(cb.equal(groupRoleRoot.get(GroupRole.Fields.roleId), roleId));
-            predicates.add(root.get("groupId").in(groupRoleSubquery));
-
+            predicates.add(root.get(Group.Fields.groupId).in(groupRoleSubquery));
+            predicates.add(cb.equal(root.get(Role.Fields.namespaceId), namespaceId));
             if (StringUtils.hasText(groupName)) {
                 predicates.add(cb.like(
-                        cb.lower(root.get("groupName")),
+                        cb.lower(root.get(Group.Fields.groupName)),
                         "%" + groupName.toLowerCase().trim() + "%"
                 ));
             }
-
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
