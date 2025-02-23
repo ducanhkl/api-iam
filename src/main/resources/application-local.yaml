@@ -10,6 +10,16 @@ spring:
       ddl-auto: update
     show-sql: true
 
+springdoc:
+  api-docs:
+    path: /open-api.json
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  packages-to-scan: org.ducanh.apiiam.controllers
+  show-actuator: true
+
 logging:
   level:
     com.zaxxer.hikari: DEBUG

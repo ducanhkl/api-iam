@@ -7,6 +7,10 @@ plugins {
 group = 'org.ducanh'
 version = '0.0.1-SNAPSHOT'
 
+springBoot {
+    buildInfo()
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(22)
@@ -28,16 +32,20 @@ ext {
 }
 
 dependencies {
+    // Spring managed dependence
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    runtimeOnly 'org.postgresql:postgresql'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Plugins
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.30'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
+    testImplementation group: 'org.junit.platform', name: 'junit-platform-launcher', version: '1.12.0'
     implementation group: 'com.auth0', name: 'java-jwt', version: '4.4.0'
     implementation group: 'org.hibernate.validator', name: 'hibernate-validator', version: '9.0.0.CR1'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.5'
 }
 
 dependencyManagement {
