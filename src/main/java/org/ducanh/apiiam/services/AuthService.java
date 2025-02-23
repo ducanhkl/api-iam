@@ -67,7 +67,7 @@ public class AuthService {
         valArg(Objects.nonNull(user), () -> new RuntimeException("User not found"));
         valUserInfo(user, namespaceId);
         PasswordAlg alg = user.getPwdAlg();
-        sessionService.checkMaxUserSession(user);
+        sessionService.checkMaxUserActiveSession(user);
         if (alg.compare(userLoginRequestDto.password(), user.getPasswordHash())) {
             user.setLastLogin(timeHelpers.currentTime());
             return jwtTokenService.issueJwtTokens(user, userAgent, ipAddress);
@@ -94,7 +94,7 @@ public class AuthService {
         String refreshTokenId = decodeRefreshToken.getId();
         Session session = sessionRepository.findSessionByRefreshTokenId(refreshTokenId);
         sessionService.revokeOldSession(session);
-        User user = userRepository.findByUserId(Long.valueOf(decodeRefreshToken.getSignature()));
+        User user = userRepository.findByUserId(Long.valueOf(decodeRefreshToken.getSubject()));
         UserLoginResponseDto result = jwtTokenService.issueJwtTokens(user, userAgent, ipAddress);
         return new TokenRefreshResponse(result.accessToken(), result.refreshToken());
     }
@@ -134,7 +134,7 @@ public class AuthService {
         valArg(Objects.nonNull(namespaceId), () -> new RuntimeException("Namespace ID cannot be null or empty"));
         valArg(Objects.nonNull(request.phoneNumber()), () -> new RuntimeException("Phone number cannot be null or empty"));
         valArg(username.length() > 3 && username.length() < 20, () -> new RuntimeException("Username must be between 3 and 100 characters"));
-        valArg(password.length() > 8 && password.length() < 20, () -> new RuntimeException("Password must be between 3 and 100 characters"));
+        valArg(password.length() > 8 && password.length() < 20, () -> new RuntimeException("Password must be between 8 and 100 characters"));
         valArg(stringContainSpecialCharacters(password), () -> new RuntimeException("Password must contain as least one special character"));
     }
 
@@ -142,8 +142,8 @@ public class AuthService {
         boolean isUsernameExisted = userRepository.existsByUsernameAndNamespaceId(request.username(), namespaceId);
         boolean isEmailExisted = userRepository.existsByEmailAndNamespaceId(request.email(), namespaceId);
         boolean namespaceExisted = namespaceRepository.existsById(namespaceId);
-        valArg(isUsernameExisted, () -> new RuntimeException("Username already existed"));
-        valArg(isEmailExisted, () -> new RuntimeException("Email already existed"));
+        valArg(!isUsernameExisted, () -> new RuntimeException("Username already existed"));
+        valArg(!isEmailExisted, () -> new RuntimeException("Email already existed"));
         valArg(namespaceExisted, () -> new RuntimeException("Namespace not existed"));
     }
 }

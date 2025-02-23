@@ -1,5 +1,7 @@
 package org.ducanh.apiiam.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +26,13 @@ import static org.ducanh.apiiam.Constants.*;
 @RequestMapping("/namespace")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Namespace controller")
 public class NamespaceController {
 
     private final NamespaceService namespaceService;
 
     @PostMapping
+    @Operation(summary = "Create namespace")
     public ResponseEntity<NamespaceResponseDto> createNamespace(
             @Valid @RequestBody CreateNamespaceRequestDto request) {
         log.info("Creating namespace: {}", request);

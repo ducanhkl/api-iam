@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.ducanh.apiiam.dto.responses.UserLoginResponseDto;
 import org.ducanh.apiiam.entities.JwtTokenType;
 import org.ducanh.apiiam.entities.KeyPair;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -34,6 +36,10 @@ import static org.ducanh.apiiam.Constants.*;
 @Service
 public class JwtTokenService {
 
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     private final KeyPairRepository keyPairRepository;
     private final SessionService sessionService;
     private final NamespaceRepository namespaceRepository;
@@ -48,12 +54,12 @@ public class JwtTokenService {
                            final TimeHelpers timeHelpers,
                            @Value("5") Integer accessTokenExpirationInSecond,
                            @Value("10") Integer refreshTokenExpirationInDay) {
-            this.keyPairRepository = keyPairRepository;
-            this.sessionService = sessionService;
-            this.namespaceRepository = namespaceRepository;
-            this.timeHelpers = timeHelpers;
-            accessTokenExpiration = Duration.ofSeconds(accessTokenExpirationInSecond);
-            refreshTokenExpiration = Duration.ofDays(refreshTokenExpirationInDay);
+        this.keyPairRepository = keyPairRepository;
+        this.sessionService = sessionService;
+        this.namespaceRepository = namespaceRepository;
+        this.timeHelpers = timeHelpers;
+        accessTokenExpiration = Duration.ofSeconds(accessTokenExpirationInSecond);
+        refreshTokenExpiration = Duration.ofDays(refreshTokenExpirationInDay);
     }
 
     public UserLoginResponseDto issueJwtTokens(User user, String userAgent, String ipAddress) {
@@ -67,7 +73,7 @@ public class JwtTokenService {
         String refreshToken = generateRefreshToken(user, keyPair, refreshTokenId, currentTime, refreshTokenExpireAt);
         sessionService.createSession(user, keyPair, userAgent, ipAddress, accessTokenId, refreshTokenId,
                 currentTime, refreshTokenExpireAt);
-        return new UserLoginResponseDto(accessToken, refreshToken);
+        return new UserLoginResponseDto(refreshToken, accessToken);
     }
 
     public DecodedJWT validateRefreshToken(String refreshToken) {
@@ -96,12 +102,13 @@ public class JwtTokenService {
                 .withClaim(TOKEN_TYPE, JwtTokenType.REFRESH_TOKEN.toString())
                 .withIssuedAt(currentTime.toInstant())
                 .withExpiresAt(expireAt.toInstant())
-                .withKeyId(keyPair.getKid())
+                .withKeyId(String.valueOf(keyPair.getKeyPairId()))
                 .withIssuer(DEFAULT_ISSUER)
                 .sign(getSigningAlgorithm(keyPair));
     }
 
     private String generateAccessToken(User user, KeyPair keyPair, String id, OffsetDateTime currentTime) {
+        // TO-DO: Add groups of user
         Instant expireAt = currentTime.plus(accessTokenExpiration).toInstant();
         return JWT.create()
                 .withJWTId(id) // Unique JTI
@@ -111,16 +118,20 @@ public class JwtTokenService {
                 .withClaim(TOKEN_TYPE_NAME, JwtTokenType.ACCESS_TOKEN.toString())
                 .withClaim(NAMESPACE_NAME, user.getNamespaceId())
                 .withClaim(EMAIL_NAME, user.getEmail())
-                .withKeyId(keyPair.getKid())
+                .withKeyId(String.valueOf(keyPair.getKeyPairId()))
                 .withIssuer(DEFAULT_ISSUER)
                 .sign(getSigningAlgorithm(keyPair));
     }
 
     private Algorithm getSigningAlgorithm(KeyPair keyPair) {
-        if (keyPair.getAlgorithm() != KeyPair.Algorithm.RSA256) {
+        if (keyPair.getAlgorithm() != KeyPair.Algorithm.RSA) {
             throw new RuntimeException("Key algorithm is not RSA");
         }
-        byte[] privateKey = Base64.getDecoder().decode(keyPair.getEncryptedPrivateKey());
+        String privateKeyPEM = keyPair.getEncryptedPrivateKey()
+                .replace("-----BEGIN RSA PRIVATE KEY-----", "")
+                .replaceAll(System.lineSeparator(), "")
+                .replace("-----END RSA PRIVATE KEY-----", "");
+        byte[] privateKey = Base64.getDecoder().decode(privateKeyPEM);
         try {
             RSAPrivateKey rsaPrivateKey  = (RSAPrivateKey) KeyFactory.getInstance("RSA")
                     .generatePrivate(new PKCS8EncodedKeySpec(privateKey));
@@ -129,14 +140,17 @@ public class JwtTokenService {
             throw new RuntimeException(e);
         }
     }
-
     private Algorithm getVerifyAlgorithm(KeyPair keyPair) {
-        if (keyPair.getAlgorithm() != KeyPair.Algorithm.RSA256) {
+        if (keyPair.getAlgorithm() != KeyPair.Algorithm.RSA) {
             throw new RuntimeException("Key algorithm is not RSA");
         }
+        String publicKeyPEM = keyPair.getPublicKey()
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replaceAll(System.lineSeparator(), "")
+                .replace("-----END PUBLIC KEY-----", "");
         try {
             RSAPublicKey rsaPublicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
-                    .generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(keyPair.getPublicKey())));
+                    .generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyPEM)));
             return Algorithm.RSA256(rsaPublicKey, null);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);

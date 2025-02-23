@@ -1,10 +1,5 @@
 package org.ducanh.apiiam.entities;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,20 +21,21 @@ import java.time.OffsetDateTime;
 public class KeyPair {
 
     public enum Algorithm {
-        RSA256, ECDSA
+        RSA, ECDSA
     }
 
     public enum KeyUsage {
         SIGNATURE, ENCRYPTION
     }
 
+    public enum KeyStatus {
+        ACTIVE, DISABLE
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generate the primary key
     @Column(name = "key_id")
     private Long keyPairId; // Primary Key
-
-    @Column(name = "kid", length = 100)
-    private String kid; // Unique Key Identifier
 
     @Column(name = "public_key", columnDefinition = "TEXT")
     private String publicKey; // Public Key Value
@@ -51,16 +47,19 @@ public class KeyPair {
     private Boolean isActive; // Indicates if the key is active
 
     @Column(name = "algorithm", length = 100)
+    @Enumerated(EnumType.STRING)
     private Algorithm algorithm; // Algorithm used for the public key (e.g., "RSA", "ECDSA")
 
     @Column(name = "key_usage", length = 50)
+    @Enumerated(EnumType.STRING)
     private KeyUsage keyUsage; // Usage of the key (e.g., "SIGNATURE", "ENCRYPTION")
 
     @Column(name = "key_rotation_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime keyRotationDate;
 
     @Column(name = "key_status", length = 50)
-    private String keyStatus;
+    @Enumerated(EnumType.STRING)
+    private KeyStatus keyStatus;
 
     @Column(name = "key_version")
     private Integer keyVersion; // Version number of the key

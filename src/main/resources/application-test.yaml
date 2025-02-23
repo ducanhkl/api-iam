@@ -1,0 +1,10 @@
+
+springdoc:
+  api-docs:
+    path: /open-api.json
+    enabled: false
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: false
+  packages-to-scan: org.ducanh.apiiam.controllers
+  show-actuator: false

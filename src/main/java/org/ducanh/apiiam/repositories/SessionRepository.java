@@ -10,9 +10,9 @@ import org.springframework.stereotype.Repository;
 public interface SessionRepository extends JpaRepository<Session, Long> {
 
     @Query("""
-        select count(*) from Session session where session.userId = :userId
+        select count(*) from Session session where session.userId = :userId AND session.active = :active
         """)
-    Integer countSessionByUserId(@Param("userId") Long userId);
+    Integer countSessionByUserId(@Param("userId") Long userId,@Param("active") boolean active);
 
     Session findSessionByRefreshTokenId(String refreshTokenId);
 }

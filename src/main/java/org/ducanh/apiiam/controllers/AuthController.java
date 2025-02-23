@@ -1,5 +1,8 @@
 package org.ducanh.apiiam.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ducanh.apiiam.dto.requests.UserLoginRequestDto;
 import org.ducanh.apiiam.dto.requests.UserRegisterRequestDto;
@@ -12,20 +15,23 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("auth")
+@Tag(name = "Auth controller")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("register")
+    @Operation(summary = "Register user account")
     public ResponseEntity<UserRegisterResponseDto> register(
-            @RequestBody UserRegisterRequestDto userRegisterRequestDto,
+            @RequestBody @Valid UserRegisterRequestDto userRegisterRequestDto,
             @RequestHeader(value = "namespace-id", required = true) String namespaceId) {
         return ResponseEntity.ok()
                 .body(authService.register(userRegisterRequestDto, namespaceId));
     }
 
     @PostMapping("login")
+    @Operation(summary = "User login and get the token")
     public ResponseEntity<UserLoginResponseDto> login(
             @RequestBody UserLoginRequestDto userLoginRequestDto,
             @RequestHeader("ip-address") String ipAddress,
@@ -34,6 +40,7 @@ public class AuthController {
     }
 
     @PutMapping("verify/{username}")
+    @Operation(summary = "Sent  the otp for user to active user")
     public ResponseEntity<?> verify(@PathVariable("username") String username,
                                     @RequestHeader("namespace-id") String namespaceId) {
         authService.verify(username, namespaceId);
@@ -42,6 +49,7 @@ public class AuthController {
 
 
     @PutMapping("/token/refresh")
+    @Operation(summary = "Renew access token to generate new session and disable old session")
     public ResponseEntity<TokenRefreshResponse> renewAccessToken(
             @RequestHeader("refresh-token") String refreshToken,
             @RequestHeader("user-agent") String userAgent,
@@ -51,11 +59,13 @@ public class AuthController {
     }
 
     @DeleteMapping("/logout")
+    @Operation(summary = "Logout from user session")
     public void logout(@RequestHeader("refresh-token") String refreshToken) {
         authService.logout(refreshToken);
     }
 
     @PutMapping("complete-verify/{username}")
+    @Operation(summary = "Input otp token to very account")
     public ResponseEntity<?> completeVerify(
             @PathVariable("username") String username,
             @RequestHeader("namespace-id") String namespaceId,

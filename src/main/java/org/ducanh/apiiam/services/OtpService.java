@@ -34,7 +34,7 @@ public class OtpService {
 
     @Transactional
     public OTP generateOtpForVerify(User user) {
-        if (UserStatus.ACTIVE != user.getStatus()) {
+        if (UserStatus.WAITING_FOR_VERIFY != user.getStatus()) {
             throw new RuntimeException("User status not valid");
         }
         String code = generateOtpForVerify(NUMBER_OF_OTP_DIGITS);

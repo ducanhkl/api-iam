@@ -70,7 +70,7 @@ public class Session {
     private String ipAddress;
 
     @Column(name = "kid", length = 100)
-    private String kid; // Key ID for JWT signing key used
+    private Long kid; // Key ID for JWT signing key used
 
     @Column(name = "sessionType", length = 20)
     @Enumerated(EnumType.STRING)
