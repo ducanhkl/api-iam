@@ -22,7 +22,7 @@ public class SessionService {
 
     @Autowired
     public SessionService(final SessionRepository sessionRepository,
-                          @Value("${app.max-user-active-session:5}")
+                          @Value("${app.auth.max-user-active-session}")
                           final Integer maxUserActiveSession) {
         this.sessionRepository = sessionRepository;
         this.maxUserActiveSession = maxUserActiveSession;

@@ -1,3 +1,7 @@
 spring:
   jpa:
     show-sql: false
+
+app:
+  exception:
+    debug: true

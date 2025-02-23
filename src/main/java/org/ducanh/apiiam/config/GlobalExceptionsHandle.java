@@ -1,0 +1,73 @@
+package org.ducanh.apiiam.config;
+
+import lombok.extern.slf4j.Slf4j;
+import org.ducanh.apiiam.dto.responses.ErrorResponseDto;
+import org.ducanh.apiiam.exceptions.DomainException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+
+@RestControllerAdvice
+@Slf4j
+public class GlobalExceptionsHandle {
+
+    private final BuildProperties buildProperties;
+    private final Boolean isDebug;
+
+    @Autowired
+    public GlobalExceptionsHandle(
+            final BuildProperties buildProperties,
+            @Value("${app.exception.debug}")
+            final Boolean isDebug
+    ) {
+        this.buildProperties = buildProperties;
+        this.isDebug = isDebug;
+    }
+
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ErrorResponseDto> handleDomainException(DomainException ex, WebRequest request) {
+        ErrorCode errorCode = ex.errorCode;
+        ErrorResponseDto errorResponse =  ErrorResponseDto.builder()
+                .errorCode(errorCode.code())
+                .shortDescriptions(errorCode.shortDescriptions)
+                .longDescription(ex.longDescription)
+                .appName(buildProperties.getName())
+                .appVersion(buildProperties.getVersion()).build();
+        if (isDebug) {
+            log.trace("Error: {}, message: {}, stackTrace: {}", ex, ex.getMessage(), ex.getStackTrace());
+        }
+        return new ResponseEntity<>(errorResponse, errorCode.httpStatus());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> handleUnknownException(Exception ex, WebRequest request) {
+        ErrorResponseDto errorResponse = ErrorResponseDto.builder()
+                .errorCode(ErrorCode.UNKNOWN_ERROR.code())
+                .shortDescriptions(ErrorCode.UNKNOWN_ERROR.shortDescriptions)
+                .longDescription(ex.getMessage())
+                .appName(buildProperties.getName())
+                .appVersion(buildProperties.getVersion())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponseDto> handleValidationException(ConstraintViolationException ex, WebRequest request) {
+        ErrorResponseDto errorResponse = ErrorResponseDto.builder()
+                .errorCode(ErrorCode.VALIDATION_ERROR.code())
+                .shortDescriptions(ErrorCode.VALIDATION_ERROR.shortDescriptions)
+                .longDescription(ex.getMessage())
+                .appName(buildProperties.getName())
+                .appVersion(buildProperties.getVersion())
+                .build();
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+}
