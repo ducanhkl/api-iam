@@ -55,6 +55,9 @@ public class GlobalExceptionsHandle {
                 .appName(buildProperties.getName())
                 .appVersion(buildProperties.getVersion())
                 .build();
+        if (isDebug) {
+            log.trace("Error: {}, message: {}, stackTrace: {}", ex, ex.getMessage(), ex.getStackTrace());
+        }
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -67,6 +70,9 @@ public class GlobalExceptionsHandle {
                 .appName(buildProperties.getName())
                 .appVersion(buildProperties.getVersion())
                 .build();
+        if (isDebug) {
+            log.trace("Error: {}, message: {}, stackTrace: {}", ex, ex.getMessage(), ex.getStackTrace());
+        }
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 

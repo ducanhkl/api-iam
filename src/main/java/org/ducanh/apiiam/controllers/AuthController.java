@@ -25,7 +25,7 @@ public class AuthController {
     @Operation(summary = "Register user account")
     public ResponseEntity<UserRegisterResponseDto> register(
             @RequestBody @Valid UserRegisterRequestDto userRegisterRequestDto,
-            @RequestHeader(value = "namespace-id", required = true) String namespaceId) {
+            @RequestHeader(value = "namespace-id") String namespaceId) {
         return ResponseEntity.ok()
                 .body(authService.register(userRegisterRequestDto, namespaceId));
     }
@@ -33,7 +33,7 @@ public class AuthController {
     @PostMapping("login")
     @Operation(summary = "User login and get the token")
     public ResponseEntity<UserLoginResponseDto> login(
-            @RequestBody UserLoginRequestDto userLoginRequestDto,
+            @RequestBody @Valid UserLoginRequestDto userLoginRequestDto,
             @RequestHeader("ip-address") String ipAddress,
             @RequestHeader("user-agent") String userAgent) {
         return ResponseEntity.ok().body(authService.login(userLoginRequestDto, ipAddress, userAgent));

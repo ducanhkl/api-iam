@@ -1,3 +1,10 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  flyway:
+    enabled: true
 
 springdoc:
   api-docs:
@@ -8,3 +15,7 @@ springdoc:
     enabled: false
   packages-to-scan: org.ducanh.apiiam.controllers
   show-actuator: false
+
+app:
+  exception:
+    debug: true
