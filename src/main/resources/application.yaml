@@ -16,10 +16,13 @@ spring:
       validation-timeout: 3000
       pool-name: "DefaultHikariPool"
 
+logging:
+  config: classpath:log4j2.xml
+
 app:
   auth:
     max-user-active-session: ${MAX_ACTIVE_SESSION:5}
-  exception:
-    debug: false
+  exceptions-handle:
+    log-stack-trace: ${APP_GLOBAL_EXCEPTIONS_LOG_STACK_TRACE:false}
 server:
   port: ${SERVER_PORT:8001}

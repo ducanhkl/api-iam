@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Properties>
+        <Property name="SERVICE_NAME">api-iam</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <JSONLayout compact="true" eventEol="true" properties="true" stacktraceAsString="true"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info" includeLocation="true">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

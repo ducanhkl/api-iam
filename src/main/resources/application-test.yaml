@@ -17,5 +17,5 @@ springdoc:
   show-actuator: false
 
 app:
-  exception:
-    debug: true
+  exceptions-handle:
+    log-stack-trace: true

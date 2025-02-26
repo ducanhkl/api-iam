@@ -8,6 +8,8 @@ import org.ducanh.apiiam.dto.responses.TokenRefreshResponse;
 import org.ducanh.apiiam.dto.responses.UserLoginResponseDto;
 import org.ducanh.apiiam.dto.responses.UserRegisterResponseDto;
 import org.ducanh.apiiam.entities.*;
+import org.ducanh.apiiam.exceptions.DomainException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.helpers.TimeHelpers;
 import org.ducanh.apiiam.repositories.NamespaceRepository;
 import org.ducanh.apiiam.repositories.SessionRepository;
@@ -144,6 +146,6 @@ public class AuthService {
         boolean namespaceExisted = namespaceRepository.existsById(namespaceId);
         valArg(!isUsernameExisted, () -> new RuntimeException("Username already existed"));
         valArg(!isEmailExisted, () -> new RuntimeException("Email already existed"));
-        valArg(namespaceExisted, () -> new RuntimeException("Namespace not existed"));
+        valArg(namespaceExisted, () -> new DomainException(ErrorCode.NAMESPACE_NOT_EXISTED, "NamespaceId: {0} not existed", namespaceId));
     }
 }

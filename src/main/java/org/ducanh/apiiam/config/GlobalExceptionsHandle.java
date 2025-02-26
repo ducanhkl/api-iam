@@ -1,5 +1,6 @@
 package org.ducanh.apiiam.config;
 
+import feign.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.responses.ErrorResponseDto;
 import org.ducanh.apiiam.exceptions.DomainException;
@@ -19,16 +20,16 @@ import org.springframework.web.context.request.WebRequest;
 public class GlobalExceptionsHandle {
 
     private final BuildProperties buildProperties;
-    private final Boolean isDebug;
+    private final Boolean isLogStackTrace;
 
     @Autowired
     public GlobalExceptionsHandle(
             final BuildProperties buildProperties,
-            @Value("${app.exception.debug}")
-            final Boolean isDebug
+            @Value("${app.exceptions-handle.log-stack-trace}")
+            final Boolean isLogStackTrace
     ) {
         this.buildProperties = buildProperties;
-        this.isDebug = isDebug;
+        this.isLogStackTrace = isLogStackTrace;
     }
 
     @ExceptionHandler(DomainException.class)
@@ -40,9 +41,7 @@ public class GlobalExceptionsHandle {
                 .longDescription(ex.longDescription)
                 .appName(buildProperties.getName())
                 .appVersion(buildProperties.getVersion()).build();
-        if (isDebug) {
-            log.trace("Error: {}, message: {}, stackTrace: {}", ex, ex.getMessage(), ex.getStackTrace());
-        }
+        logError(ex);
         return new ResponseEntity<>(errorResponse, errorCode.httpStatus());
     }
 
@@ -55,9 +54,7 @@ public class GlobalExceptionsHandle {
                 .appName(buildProperties.getName())
                 .appVersion(buildProperties.getVersion())
                 .build();
-        if (isDebug) {
-            log.trace("Error: {}, message: {}, stackTrace: {}", ex, ex.getMessage(), ex.getStackTrace());
-        }
+        logError(ex);
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -70,10 +67,16 @@ public class GlobalExceptionsHandle {
                 .appName(buildProperties.getName())
                 .appVersion(buildProperties.getVersion())
                 .build();
-        if (isDebug) {
-            log.trace("Error: {}, message: {}, stackTrace: {}", ex, ex.getMessage(), ex.getStackTrace());
-        }
+        logError(ex);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    private void logError(Exception ex) {
+        if (isLogStackTrace) {
+            log.error("Error: {}, message: {}, stackTrace: {}", ex, ex.getMessage(), ex.getStackTrace());
+            return;
+        }
+        log.error("Error: {}, message: {}", ex, ex.getMessage());
     }
 
 }

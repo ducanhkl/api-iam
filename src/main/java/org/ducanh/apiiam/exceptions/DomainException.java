@@ -12,9 +12,16 @@ public class DomainException extends RuntimeException {
         this.longDescription = longDescription;
     }
 
+    public DomainException(ErrorCode errorCode,
+                           String longDescriptionPattern,
+                           Object... args) {
+        this.errorCode = errorCode;
+        this.longDescription = MessageFormat.format(longDescriptionPattern, args);
+    }
+
     @Override
     public String getMessage() {
-        return MessageFormat.format("Code: {}, shortDescriptions: {}, longDescription: {}",
+        return MessageFormat.format("Code: {0}, shortDescriptions: {1}, longDescription: {2}",
                 errorCode.code(), errorCode.shortDescriptions, longDescription);
     }
 

@@ -7,8 +7,9 @@ import java.text.MessageFormat;
 public enum ErrorCode {
 
     UNKNOWN_ERROR("001", ErrorGroup.UNKNOWN, HttpStatus.INTERNAL_SERVER_ERROR, "Unknown error"),
-    VALIDATION_ERROR("002", ErrorGroup.UNKNOWN, HttpStatus.BAD_REQUEST, "Validation error");
-    ;
+    VALIDATION_ERROR("002", ErrorGroup.UNKNOWN, HttpStatus.BAD_REQUEST, "Validation error"),
+    NAMESPACE_NOT_EXISTED("003", ErrorGroup.NAMESPACE, HttpStatus.BAD_REQUEST,
+            "Namespace not existed"),;
 
     private final String code;
     private final ErrorGroup errorGroup;

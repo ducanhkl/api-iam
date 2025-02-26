@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Properties>
+        <Property name="SERVICE_NAME">api-iam</Property>
+        <Property name="console-layout-pattern">%white{%d{yyyy-MM-dd HH:mm:ss.SSS}} %highlight{%-5level} --- %magenta{[%thread]} %cyan{%logger{36}}: %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%xwEx}</Property>
+        <!-- https://www.baeldung.com/spring-boot-logging -->
+        <!-- https://github.com/spring-projects/spring-boot/blob/main/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/logging/log4j2/ExtendedWhitespaceThrowablePatternConverter.java -->
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${console-layout-pattern}"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info" includeLocation="true">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
