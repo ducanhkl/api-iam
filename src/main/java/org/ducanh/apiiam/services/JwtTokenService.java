@@ -10,6 +10,8 @@ import org.ducanh.apiiam.entities.JwtTokenType;
 import org.ducanh.apiiam.entities.KeyPair;
 import org.ducanh.apiiam.entities.Namespace;
 import org.ducanh.apiiam.entities.User;
+import org.ducanh.apiiam.exceptions.DomainException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.helpers.TimeHelpers;
 import org.ducanh.apiiam.repositories.KeyPairRepository;
 import org.ducanh.apiiam.repositories.NamespaceRepository;
@@ -77,7 +79,13 @@ public class JwtTokenService {
     }
 
     public DecodedJWT validateRefreshToken(String refreshToken) {
-        DecodedJWT decodedJWT = JWT.decode(refreshToken);
+        final DecodedJWT decodedJWT;
+        try {
+            decodedJWT = JWT.decode(refreshToken);
+        } catch (Exception ex) {
+            throw new DomainException(ErrorCode.INVALID_TOKEN, "Invalid refresh token")
+                    .setCause(ex);
+        }
         KeyPair keyPair = keyPairRepository.findKeyPairsByKeyPairId(Long.valueOf(decodedJWT.getKeyId()));
         String tokenType = Optional.of(decodedJWT.getClaim(TOKEN_TYPE))
                 .map(Claim::asString)

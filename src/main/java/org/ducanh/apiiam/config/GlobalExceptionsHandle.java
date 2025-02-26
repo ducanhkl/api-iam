@@ -1,6 +1,5 @@
 package org.ducanh.apiiam.config;
 
-import feign.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.responses.ErrorResponseDto;
 import org.ducanh.apiiam.exceptions.DomainException;
@@ -20,16 +19,16 @@ import org.springframework.web.context.request.WebRequest;
 public class GlobalExceptionsHandle {
 
     private final BuildProperties buildProperties;
-    private final Boolean isLogStackTrace;
+    private final Boolean isLogErrorDetail;
 
     @Autowired
     public GlobalExceptionsHandle(
             final BuildProperties buildProperties,
-            @Value("${app.exceptions-handle.log-stack-trace}")
-            final Boolean isLogStackTrace
+            @Value("${app.exceptions-handle.log-error-detail}")
+            final Boolean isLogErrorDetail
     ) {
         this.buildProperties = buildProperties;
-        this.isLogStackTrace = isLogStackTrace;
+        this.isLogErrorDetail = isLogErrorDetail;
     }
 
     @ExceptionHandler(DomainException.class)
@@ -72,8 +71,8 @@ public class GlobalExceptionsHandle {
     }
 
     private void logError(Exception ex) {
-        if (isLogStackTrace) {
-            log.error("Error: {}, message: {}, stackTrace: {}", ex, ex.getMessage(), ex.getStackTrace());
+        if (isLogErrorDetail) {
+            log.error("Error detail", ex);
             return;
         }
         log.error("Error: {}, message: {}", ex, ex.getMessage());

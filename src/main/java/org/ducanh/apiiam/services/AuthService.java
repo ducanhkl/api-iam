@@ -9,7 +9,6 @@ import org.ducanh.apiiam.dto.responses.UserLoginResponseDto;
 import org.ducanh.apiiam.dto.responses.UserRegisterResponseDto;
 import org.ducanh.apiiam.entities.*;
 import org.ducanh.apiiam.exceptions.DomainException;
-import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.helpers.TimeHelpers;
 import org.ducanh.apiiam.repositories.NamespaceRepository;
 import org.ducanh.apiiam.repositories.SessionRepository;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+import static org.ducanh.apiiam.exceptions.ErrorCode.*;
 import static org.ducanh.apiiam.helpers.ValidationHelpers.stringContainSpecialCharacters;
 import static org.ducanh.apiiam.helpers.ValidationHelpers.valArg;
 
@@ -66,7 +66,8 @@ public class AuthService {
         String namespaceId = userLoginRequestDto.namespaceId();
         validate(userLoginRequestDto);
         User user = userRepository.findByUsernameAndNamespaceId(userLoginRequestDto.username(), namespaceId);
-        valArg(Objects.nonNull(user), () -> new RuntimeException("User not found"));
+        valArg(Objects.nonNull(user),
+                () -> new DomainException(USERNAME_NOT_EXISTED, "Username: {0} not existed", userLoginRequestDto.username()));
         valUserInfo(user, namespaceId);
         PasswordAlg alg = user.getPwdAlg();
         sessionService.checkMaxUserActiveSession(user);
@@ -74,7 +75,7 @@ public class AuthService {
             user.setLastLogin(timeHelpers.currentTime());
             return jwtTokenService.issueJwtTokens(user, userAgent, ipAddress);
         }
-        throw new RuntimeException("Invalid password");
+        throw new DomainException(INVALID_PASSWORD, "User {0} input invalid password", user.getUserId());
     }
 
     public void verify(String username, String namespaceId) {
@@ -87,7 +88,7 @@ public class AuthService {
                                String code) {
         User user = userRepository.findByUsernameAndNamespaceId(username, namespaceId);
         if (!otpService.completeVerifyOtp(user, code)) {
-            throw new RuntimeException("Otp is wrong");
+            throw new DomainException(INVALID_OTP, "Invalid OTP");
         }
     }
 
@@ -115,37 +116,37 @@ public class AuthService {
     private void valUserInfo(User user, String namespaceId) {
         // TO-DO: implement mechanism for limit the number of active session
         namespaceRepository.existOrThrowById(namespaceId);
-        valArg(UserStatus.ACTIVE == user.getStatus(), () -> new RuntimeException("User status not valid"));
-        valArg(!user.getAccountLocked(), () -> new RuntimeException("User account locked"));
-        valArg(!user.getDeleted(), () -> new RuntimeException("User deleted"));
-        valArg(Objects.nonNull(user.getPwdAlg()), () -> new RuntimeException("Password alg is empty"));
+        valArg(UserStatus.ACTIVE == user.getStatus(), () -> new DomainException(USER_STATUS_NOT_VALID,
+                "User status: {0} is not valid", user.getStatus()));
+        valArg(!user.getAccountLocked(), () -> new DomainException(USER_STATUS_NOT_VALID, "User is locked"));
+        valArg(!user.getDeleted(), () -> new DomainException(USER_STATUS_NOT_VALID, "User is deleted"));
     }
 
     private void validate(UserLoginRequestDto request) {
-        valArg(Objects.nonNull(request.username()), () -> new RuntimeException("Username cannot be null or empty"));
-        valArg(Objects.nonNull(request.password()), () -> new RuntimeException("Password cannot be null or empty"));
-        valArg(Objects.nonNull(request.namespaceId()), () -> new RuntimeException("NamespaceId cannot be null or empty"));
+        valArg(Objects.nonNull(request.username()), () -> new DomainException(VALIDATION_ERROR, "Username is empty"));
+        valArg(Objects.nonNull(request.password()), () -> new DomainException(VALIDATION_ERROR, "Password cannot be null or empty"));
+        valArg(Objects.nonNull(request.namespaceId()), () -> new DomainException(VALIDATION_ERROR, "NamespaceId cannot be null or empty"));
     }
 
     private void validate(UserRegisterRequestDto request, String namespaceId) {
         String username = request.username();
         String password = request.password();
-        valArg(Objects.nonNull(request.username()), () -> new RuntimeException("Username cannot be null or empty"));
-        valArg(Objects.nonNull(request.password()), () -> new RuntimeException("Password cannot be null or empty"));
-        valArg(Objects.nonNull(request.email()), () -> new RuntimeException("Email cannot be null or empty"));
-        valArg(Objects.nonNull(namespaceId), () -> new RuntimeException("Namespace ID cannot be null or empty"));
-        valArg(Objects.nonNull(request.phoneNumber()), () -> new RuntimeException("Phone number cannot be null or empty"));
-        valArg(username.length() > 3 && username.length() < 20, () -> new RuntimeException("Username must be between 3 and 100 characters"));
-        valArg(password.length() > 8 && password.length() < 20, () -> new RuntimeException("Password must be between 8 and 100 characters"));
-        valArg(stringContainSpecialCharacters(password), () -> new RuntimeException("Password must contain as least one special character"));
+        valArg(Objects.nonNull(request.username()), () -> new DomainException(VALIDATION_ERROR, "Username cannot be null or empty"));
+        valArg(Objects.nonNull(request.password()), () -> new DomainException(VALIDATION_ERROR, "Password cannot be null or empty"));
+        valArg(Objects.nonNull(request.email()), () -> new DomainException(VALIDATION_ERROR, "Email cannot be null or empty"));
+        valArg(Objects.nonNull(namespaceId), () -> new DomainException(VALIDATION_ERROR, "Namespace ID cannot be null or empty"));
+        valArg(Objects.nonNull(request.phoneNumber()), () -> new DomainException(VALIDATION_ERROR, "Phone number cannot be null or empty"));
+        valArg(username.length() > 3 && username.length() < 20, () -> new DomainException(VALIDATION_ERROR, "Username must be between 3 and 100 characters"));
+        valArg(password.length() > 8 && password.length() < 20, () -> new DomainException(VALIDATION_ERROR, "Password must be between 8 and 100 characters"));
+        valArg(stringContainSpecialCharacters(password), () -> new DomainException(VALIDATION_ERROR, "Password must contain as least one special character"));
     }
 
     private void checkRegisInfo(UserRegisterRequestDto request, String namespaceId) {
         boolean isUsernameExisted = userRepository.existsByUsernameAndNamespaceId(request.username(), namespaceId);
         boolean isEmailExisted = userRepository.existsByEmailAndNamespaceId(request.email(), namespaceId);
         boolean namespaceExisted = namespaceRepository.existsById(namespaceId);
-        valArg(!isUsernameExisted, () -> new RuntimeException("Username already existed"));
-        valArg(!isEmailExisted, () -> new RuntimeException("Email already existed"));
-        valArg(namespaceExisted, () -> new DomainException(ErrorCode.NAMESPACE_NOT_EXISTED, "NamespaceId: {0} not existed", namespaceId));
+        valArg(!isUsernameExisted, () -> new DomainException(VALIDATION_ERROR, "Username already existed"));
+        valArg(!isEmailExisted, () -> new DomainException(VALIDATION_ERROR, "Email already existed"));
+        valArg(namespaceExisted, () -> new DomainException(NAMESPACE_NOT_EXISTED, "NamespaceId: {0} not existed", namespaceId));
     }
 }

@@ -18,4 +18,4 @@ springdoc:
 
 app:
   exceptions-handle:
-    log-stack-trace: true
+    log-error-detail: true

@@ -25,5 +25,9 @@ public class DomainException extends RuntimeException {
                 errorCode.code(), errorCode.shortDescriptions, longDescription);
     }
 
+    public DomainException setCause(Throwable ex) {
+        this.initCause(ex);
+        return this;
+    }
 
 }

@@ -10,5 +10,6 @@ public enum ErrorGroup {
     API_KEY,
     CLIENT,
     AUTH,
-    UNKNOWN
+    UNKNOWN,
+    TOKEN
 }

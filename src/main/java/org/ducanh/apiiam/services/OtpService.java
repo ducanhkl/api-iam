@@ -87,9 +87,6 @@ public class OtpService {
         int lowerBound = (int) Math.pow(10, numberOfDigits - 1);
         int upperBound = (int) Math.pow(10, numberOfDigits) - 1;
         int otp = lowerBound + random.nextInt(upperBound - lowerBound + 1);
-
         return String.valueOf(otp);
-
-
     }
 }

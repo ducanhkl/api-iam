@@ -23,6 +23,6 @@ app:
   auth:
     max-user-active-session: ${MAX_ACTIVE_SESSION:5}
   exceptions-handle:
-    log-stack-trace: ${APP_GLOBAL_EXCEPTIONS_LOG_STACK_TRACE:false}
+    log-error-detail: ${APP_GLOBAL_EXCEPTIONS_LOG_ERROR_DETAIL:false}
 server:
   port: ${SERVER_PORT:8001}
