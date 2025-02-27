@@ -359,4 +359,26 @@ public class AuthControllerE2eTest {
                 .body("errorCode", containsString("USER_004_400"))
                 .body("shortDescriptions", containsString("Username not existed"));
     }
+
+    @Test
+    void whenRenewTokenAndPassWrongTokenType_shouldThrowError() {
+        // Given - Register, verify and login
+        Pair<String, String> tokens = registerAndVerifyUser("logout", "logout123!", "logout@test.com", "0936609206");
+        String accessToken = tokens.getKey();
+
+        // When - Logout
+        given()
+                .header("refresh-token", accessToken) // Wrong token
+                .when()
+                .delete("/auth/logout")
+                .then()
+                .statusCode(401)
+                .body("errorCode", containsString("TOKEN_008_401"));
+        // Then - Verify session is deactivated
+        long activeSessionCount = sessionRepository.countSessionByUserId(
+                userRepository.findByUsernameAndNamespaceId("logout", "master").getUserId(),
+                true
+        );
+        Assertions.assertEquals(1, activeSessionCount);
+    }
 }
