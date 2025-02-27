@@ -2,7 +2,7 @@ package org.ducanh.apiiam.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.responses.ErrorResponseDto;
-import org.ducanh.apiiam.exceptions.DomainException;
+import org.ducanh.apiiam.exceptions.CommonException;
 import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +31,8 @@ public class GlobalExceptionsHandle {
         this.isLogErrorDetail = isLogErrorDetail;
     }
 
-    @ExceptionHandler(DomainException.class)
-    public ResponseEntity<ErrorResponseDto> handleDomainException(DomainException ex, WebRequest request) {
+    @ExceptionHandler(CommonException.class)
+    public ResponseEntity<ErrorResponseDto> handleDomainException(CommonException ex, WebRequest request) {
         ErrorCode errorCode = ex.errorCode;
         ErrorResponseDto errorResponse =  ErrorResponseDto.builder()
                 .errorCode(errorCode.code())

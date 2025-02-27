@@ -2,17 +2,17 @@ package org.ducanh.apiiam.exceptions;
 
 import java.text.MessageFormat;
 
-public class DomainException extends RuntimeException {
+public class CommonException extends RuntimeException {
 
     public final ErrorCode errorCode;
     public final String longDescription;
 
-    public DomainException(ErrorCode errorCode, String longDescription) {
+    public CommonException(ErrorCode errorCode, String longDescription) {
         this.errorCode = errorCode;
         this.longDescription = longDescription;
     }
 
-    public DomainException(ErrorCode errorCode,
+    public CommonException(ErrorCode errorCode,
                            String longDescriptionPattern,
                            Object... args) {
         this.errorCode = errorCode;
@@ -25,7 +25,7 @@ public class DomainException extends RuntimeException {
                 errorCode.code(), errorCode.shortDescriptions, longDescription);
     }
 
-    public DomainException setCause(Throwable ex) {
+    public CommonException setCause(Throwable ex) {
         this.initCause(ex);
         return this;
     }

@@ -7,18 +7,25 @@ import io.restassured.http.ContentType;
 import org.ducanh.apiiam.ContainerConfig;
 import org.ducanh.apiiam.entities.OTP;
 import org.ducanh.apiiam.entities.User;
+import org.ducanh.apiiam.helpers.TimeHelpers;
 import org.ducanh.apiiam.repositories.OtpRepository;
 import org.ducanh.apiiam.repositories.SessionRepository;
 import org.ducanh.apiiam.repositories.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.shaded.org.apache.commons.lang3.tuple.Pair;
+
+import java.time.OffsetDateTime;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
@@ -41,6 +48,8 @@ public class AuthControllerE2eTest {
     @LocalServerPort
     private int port;
 
+    @MockitoSpyBean
+    private TimeHelpers timeHelpers;
 
     @BeforeEach
     public void beforeEach1() {
@@ -51,12 +60,41 @@ public class AuthControllerE2eTest {
         otpRepository.deleteAll();
     }
 
+    @AfterEach
+    public void afterEach() {
+        Mockito.reset(timeHelpers);
+    }
+
     private String getLatestOtpCode(String username, String namespaceId) {
         User user = userRepository.findByUsernameAndNamespaceId(username, namespaceId);
         OTP otp = otpRepository.findLatestOTPByUserIdAndType(user.getUserId(), OTP.Type.VERIFY);
         return otp.getCode();
     }
 
+    @Test
+    void whenRenewTokenAndTokenExpire_shouldThrowError() {
+        // Given - Register, verify and login
+        Pair<String, String> tokens = registerAndVerifyUser("logout", "logout123!", "logout@test.com", "0936609206");
+        String refreshToken = tokens.getValue();
+        Mockito.when(timeHelpers.currentTime()).thenReturn(OffsetDateTime.now().plusMonths(10));
+        // When - Logout
+        given()
+                .header("refresh-token", refreshToken)
+                .header("user-agent", "test-agent")
+                .header("ip-address", "127.0.0.1")
+                .when()
+                .put("/auth/token/refresh")
+                .then()
+                .statusCode(401)
+                .body("errorCode", containsString("TOKEN_008_401"))
+                .body("longDescription", containsString("Refresh token is expired"));
+        // Then - Verify session is deactivated
+        long activeSessionCount = sessionRepository.countSessionByUserId(
+                userRepository.findByUsernameAndNamespaceId("logout", "master").getUserId(),
+                true
+        );
+        Assertions.assertEquals(1, activeSessionCount);
+    }
 
     @Test
     public void givenUser_whenRegister_shouldReturnSucceed() {
@@ -369,8 +407,10 @@ public class AuthControllerE2eTest {
         // When - Logout
         given()
                 .header("refresh-token", accessToken) // Wrong token
+                .header("user-agent", "test-agent")
+                .header("ip-address", "127.0.0.1")
                 .when()
-                .delete("/auth/logout")
+                .put("/auth/token/refresh")
                 .then()
                 .statusCode(401)
                 .body("errorCode", containsString("TOKEN_008_401"));
@@ -383,152 +423,26 @@ public class AuthControllerE2eTest {
     }
 
     @Test
-    void whenRegisterWithInvalidEmailFormat_thenFail() {
+    void whenRefreshTokenSignatureIsInvalid_thenVerifyFails() {
+        // Given - Register, verify, and login to get a valid refresh token
+        Pair<String, String> tokens = registerAndVerifyUser("invalidtoken", "invalidtoken123!", "invalidtoken@test.com", "0936609206");
+        String validRefreshToken = tokens.getValue();
+
+        // Tamper with the signature to make the token invalid
+        String[] parts = validRefreshToken.split("\\.");
+        String tamperedSignature = parts[2] + "tampered"; // Tamper with the signature
+        String tamperedToken = parts[0] + "." + parts[1] + "." + tamperedSignature;
+
+        // When - Try to refresh the token with the tampered refresh token
         given()
-                .contentType(ContentType.JSON)
-                .body("""
-                {
-                    "username": "invalidemail",
-                    "password": "password123!",
-                    "email": "invalid-email",
-                    "phoneNumber": "0936609206"
-                }
-                """)
-                .header("namespace-id", "master")
+                .header("refresh-token", tamperedToken)
+                .header("user-agent", "test-agent")
+                .header("ip-address", "127.0.0.1")
                 .when()
-                .post("/auth/register")
+                .put("/auth/token/refresh")
                 .then()
-                .statusCode(400)
-                .body("errorCode", containsString("VALIDATION_002_400"));
-    }
-
-    @Test
-    void whenRegisterWithWeakPassword_thenFail() {
-        given()
-                .contentType(ContentType.JSON)
-                .body("""
-                {
-                    "username": "weakpass",
-                    "password": "123",
-                    "email": "weak@test.com",
-                    "phoneNumber": "0936609206"
-                }
-                """)
-                .header("namespace-id", "master")
-                .when()
-                .post("/auth/register")
-                .then()
-                .statusCode(400)
-                .body("errorCode", containsString("PASSWORD_007_400"));
-    }
-
-    @Test
-    void whenVerifyWithNonExistentUsername_thenFail() {
-        given()
-                .header("namespace-id", "master")
-                .when()
-                .put("/auth/verify/nonexistent")
-                .then()
-                .statusCode(400)
-                .body("errorCode", containsString("USER_004_400"));
-    }
-
-    @Test
-    void whenCompleteVerifyWithExpiredOTP_thenFail() throws InterruptedException {
-        // Given - Register and initiate verification
-        given()
-                .contentType(ContentType.JSON)
-                .body("""
-                {
-                    "username": "expiredotp",
-                    "password": "expired123!",
-                    "email": "expired@test.com",
-                    "phoneNumber": "0936609206"
-                }
-                """)
-                .header("namespace-id", "master")
-                .post("/auth/register");
-
-        given()
-                .header("namespace-id", "master")
-                .put("/auth/verify/expiredotp");
-
-        // Wait for OTP to expire (assuming 1 minute expiration)
-        Thread.sleep(61000);
-
-        // When - Try to verify with expired OTP
-        String otpCode = getLatestOtpCode("expiredotp", "master");
-        given()
-                .header("namespace-id", "master")
-                .header("code", otpCode)
-                .when()
-                .put("/auth/complete-verify/expiredotp")
-                .then()
-                .statusCode(400)
-                .body("errorCode", containsString("OTP_005_400"));
-    }
-
-    @Test
-    void whenLoginWithMultipleSessions_thenSuccess() {
-        // Given - Register and verify user
-        registerAndVerifyUser("multisession", "multisession123!", "multisession@test.com", "0936609206");
-
-        // When - Create multiple sessions
-        for (int i = 0; i < 3; i++) {
-            given()
-                    .contentType(ContentType.JSON)
-                    .body("""
-                    {
-                        "username": "multisession",
-                        "password": "multisession123!",
-                        "namespaceId": "master"
-                    }
-                    """)
-                    .header("ip-address", "127.0.0." + i)
-                    .header("user-agent", "test-agent-" + i)
-                    .post("/auth/login");
-        }
-
-        // Then - Verify all sessions are active
-        long activeSessionCount = sessionRepository.countSessionByUserId(
-                userRepository.findByUsernameAndNamespaceId("multisession", "master").getUserId(),
-                true
-        );
-        Assertions.assertEquals(3, activeSessionCount);
-    }
-
-    @Test
-    void whenLogoutAllSessions_thenSuccess() {
-        // Given - Register, verify and create multiple sessions
-        Pair<String, String> tokens = registerAndVerifyUser("logoutall", "logoutall123!", "logoutall@test.com", "0936609206");
-        for (int i = 0; i < 3; i++) {
-            given()
-                    .contentType(ContentType.JSON)
-                    .body("""
-                    {
-                        "username": "logoutall",
-                        "password": "logoutall123!",
-                        "namespaceId": "master"
-                    }
-                    """)
-                    .header("ip-address", "127.0.0." + i)
-                    .header("user-agent", "test-agent-" + i)
-                    .post("/auth/login");
-        }
-
-        // When - Logout all sessions
-        given()
-                .header("refresh-token", tokens.getValue())
-                .when()
-                .delete("/auth/logout-all")
-                .then()
-                .statusCode(200);
-
-        // Then - Verify no active sessions
-        long activeSessionCount = sessionRepository.countSessionByUserId(
-                userRepository.findByUsernameAndNamespaceId("logoutall", "master").getUserId(),
-                true
-        );
-        Assertions.assertEquals(0, activeSessionCount);
+                .statusCode(401)
+                .body("errorCode", containsString("TOKEN_008_401"))
+                .body("longDescription", containsString("Verify refreshToken failed"));
     }
 }

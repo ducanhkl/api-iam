@@ -10,7 +10,7 @@ import org.ducanh.apiiam.entities.JwtTokenType;
 import org.ducanh.apiiam.entities.KeyPair;
 import org.ducanh.apiiam.entities.Namespace;
 import org.ducanh.apiiam.entities.User;
-import org.ducanh.apiiam.exceptions.DomainException;
+import org.ducanh.apiiam.exceptions.CommonException;
 import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.helpers.TimeHelpers;
 import org.ducanh.apiiam.repositories.KeyPairRepository;
@@ -19,11 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
@@ -83,22 +81,26 @@ public class JwtTokenService {
         try {
             decodedJWT = JWT.decode(refreshToken);
         } catch (Exception ex) {
-            throw new DomainException(ErrorCode.INVALID_TOKEN, "Invalid refresh token")
+            throw new CommonException(ErrorCode.INVALID_TOKEN, "Invalid refresh token")
                     .setCause(ex);
+        }
+        if (decodedJWT.getExpiresAt().toInstant().isBefore(timeHelpers.currentTime().toInstant())) {
+            throw new CommonException(ErrorCode.INVALID_TOKEN, "Refresh token is expired");
         }
         KeyPair keyPair = keyPairRepository.findKeyPairsByKeyPairId(Long.valueOf(decodedJWT.getKeyId()));
         String tokenType = Optional.of(decodedJWT.getClaim(TOKEN_TYPE))
                 .map(Claim::asString)
                 .orElseThrow(() -> new RuntimeException("Token type not existed"));
         if (!tokenType.equals(JwtTokenType.REFRESH_TOKEN.toString())) {
-            throw new RuntimeException("Refresh token does not match expected token type");
+            throw new CommonException(ErrorCode.INVALID_TOKEN, "Refresh token does not match expected token type");
         }
         try {
             return JWT.require(getVerifyAlgorithm(keyPair))
                     .build()
                     .verify(refreshToken);
         } catch (Exception ex) {
-            throw new RuntimeException("Verify refreshToken failed", ex);
+            throw new CommonException(ErrorCode.INVALID_TOKEN, "Verify refreshToken failed")
+                    .setCause(ex);
         }
     }
 
@@ -133,24 +135,25 @@ public class JwtTokenService {
 
     private Algorithm getSigningAlgorithm(KeyPair keyPair) {
         if (keyPair.getAlgorithm() != KeyPair.Algorithm.RSA) {
-            throw new RuntimeException("Key algorithm is not RSA");
+            throw new CommonException(ErrorCode.UNKNOWN_ERROR, "Key algorithm is not RSA");
         }
         String privateKeyPEM = keyPair.getEncryptedPrivateKey()
                 .replace("-----BEGIN RSA PRIVATE KEY-----", "")
                 .replaceAll(System.lineSeparator(), "")
                 .replace("-----END RSA PRIVATE KEY-----", "");
-        byte[] privateKey = Base64.getDecoder().decode(privateKeyPEM);
         try {
+            byte[] privateKey = Base64.getDecoder().decode(privateKeyPEM);
             RSAPrivateKey rsaPrivateKey  = (RSAPrivateKey) KeyFactory.getInstance("RSA")
                     .generatePrivate(new PKCS8EncodedKeySpec(privateKey));
             return Algorithm.RSA256(null, rsaPrivateKey);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new CommonException(ErrorCode.UNKNOWN_ERROR, "Generate private key failed")
+                    .setCause(e);
         }
     }
     private Algorithm getVerifyAlgorithm(KeyPair keyPair) {
         if (keyPair.getAlgorithm() != KeyPair.Algorithm.RSA) {
-            throw new RuntimeException("Key algorithm is not RSA");
+            throw new CommonException(ErrorCode.UNKNOWN_ERROR, "Key algorithm is not RSA");
         }
         String publicKeyPEM = keyPair.getPublicKey()
                 .replace("-----BEGIN PUBLIC KEY-----", "")
@@ -160,8 +163,9 @@ public class JwtTokenService {
             RSAPublicKey rsaPublicKey = (RSAPublicKey) KeyFactory.getInstance("RSA")
                     .generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyPEM)));
             return Algorithm.RSA256(rsaPublicKey, null);
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new CommonException(ErrorCode.UNKNOWN_ERROR, "Generate public key failed")
+                    .setCause(e);
         }
     }
 }
