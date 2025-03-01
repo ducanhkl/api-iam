@@ -16,6 +16,7 @@ import java.util.Optional;
 public interface GroupRepository extends JpaRepository<Group, String>, JpaSpecificationExecutor<Group> {
 
     Optional<Group> findGroupByNamespaceIdAndGroupId(String namespaceId, String groupId);
+    List<Group> findGroupByNamespaceIdAndGroupIdIn(String namespaceId, List<String> groupIds);
     boolean existsAllByNamespaceIdAndGroupIdIn(String namespaceId, List<String> groupIds);
     boolean existsByGroupIdAndNamespaceId(String groupId, String namespaceId);
     default void notExistsByNamespaceIdAndGroupIdOrThrow(String groupId, String namespaceId) {

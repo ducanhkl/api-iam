@@ -22,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -53,13 +55,12 @@ public class RolePermissionService {
                     "Some permission not exists");
         }
 
-        List<String> existingPermissionIds = rolePermissionRepository.findAllByNamespaceIdAndRoleId(namespaceId, roleId)
-                .stream()
-                .map(RolePermission::getPermissionId)
-                .toList();
+        List<String> existingPermissionIds = rolePermissionRepository
+                .findExistedPermissionIds(namespaceId, roleId, permissionIds);
+        HashSet<String> existedPermissionIdSet = new HashSet<>(existingPermissionIds);
 
         List<RolePermission> newRolePermissions = permissionIds.stream()
-                .filter(permissionId -> !existingPermissionIds.contains(permissionId))
+                .filter(permissionId -> !existedPermissionIdSet.contains(permissionId))
                 .map(permissionId -> RolePermission.builder()
                         .roleId(roleId)
                         .permissionId(permissionId)

@@ -21,4 +21,9 @@ public interface GroupRoleRepository extends JpaRepository<GroupRole, Long> {
 
     @Modifying
     void deleteAllByGroupIdAndNamespaceId(String groupId, String namespaceId);
+
+    @Query("""
+        SELECT gr.roleId FROM GroupRole gr WHERE gr.groupId = :groupId AND gr.roleId IN (:roleIds) AND gr.namespaceId = :namespaceId
+        """)
+    List<String> findExistedRoleId(String groupId, String namespaceId, List<String> roleIds);
 }

@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(ContainerConfig.class)
-class RoleControllerE2eTest {
+public class RoleControllerE2eTest {
 
     @LocalServerPort
     private int port;

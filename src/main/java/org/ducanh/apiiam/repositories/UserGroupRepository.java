@@ -9,20 +9,19 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface UserGroupRepository extends JpaRepository<UserGroup, Long>, JpaSpecificationExecutor<UserGroup> {
 
     List<UserGroup> findAllUserGroupsByUserIdAndGroupIdIn(Long userId, List<String> groupIds);
 
-
+    @Modifying
     @Query("""
-        SELECT ug.groupId FROM UserGroup ug
-        WHERE ug.userId = :userId
-            AND ug.groupId NOT IN :groupIds
+            SELECT ug.groupId FROM UserGroup ug
+                    WHERE ug.userId=:userId AND ug.groupId in (:groupIds)
         """)
-    List<String> findGroupIdsByUserIdAndGroupIdNotIn(@Param("userId") Long userId,
-                                                     @Param("groupIds") List<String> groupIds);
+    List<String> findGroupIdByUserIdAndGroupIdIn(Long userId, List<String> groupIds);
 
     @Modifying
     @Query("""
@@ -33,4 +32,6 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Long>, Jpa
 
     @Modifying
     void deleteAllByGroupIdAndNamespaceId(String groupId, String namespaceId);
+
+    List<UserGroup> findAllByUserId(Long userId);
 }

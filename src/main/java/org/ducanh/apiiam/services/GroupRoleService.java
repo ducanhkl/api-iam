@@ -22,7 +22,9 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -56,13 +58,10 @@ public class GroupRoleService {
         }
 
         // Filter out already assigned roles
-        List<String> existingRoleIds = groupRoleRepository.findAllByNamespaceIdAndGroupId(namespaceId, groupId)
-                .stream()
-                .map(GroupRole::getRoleId)
-                .toList();
-
+        List<String> existingRoleIds = groupRoleRepository.findExistedRoleId(groupId, namespaceId, roleIds);
+        Set<String> existingRoleIdSet = new HashSet<>(existingRoleIds);
         List<GroupRole> newGroupRoles = roleIds.stream()
-                .filter(roleId -> !existingRoleIds.contains(roleId))
+                .filter(roleId -> !existingRoleIdSet.contains(roleId))
                 .map(roleId -> GroupRole.builder()
                         .groupId(groupId)
                         .roleId(roleId)

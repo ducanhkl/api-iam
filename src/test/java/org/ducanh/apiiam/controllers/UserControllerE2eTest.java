@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(ContainerConfig.class)
-class UserControllerE2eTest {
+public class UserControllerE2eTest {
 
     @LocalServerPort
     private int port;

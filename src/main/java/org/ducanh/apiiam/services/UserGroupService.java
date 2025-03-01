@@ -4,12 +4,13 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import lombok.extern.slf4j.Slf4j;
-import org.ducanh.apiiam.dto.responses.GroupResponseDto;
 import org.ducanh.apiiam.dto.responses.UserGroupResponseDto;
 import org.ducanh.apiiam.dto.responses.VerifyUserGroupResponseDto;
 import org.ducanh.apiiam.entities.Group;
 import org.ducanh.apiiam.entities.User;
 import org.ducanh.apiiam.entities.UserGroup;
+import org.ducanh.apiiam.exceptions.CommonException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.repositories.GroupRepository;
 import org.ducanh.apiiam.repositories.UserGroupRepository;
 import org.ducanh.apiiam.repositories.UserRepository;
@@ -20,8 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,10 +50,12 @@ public class UserGroupService {
         User user = userRepository.findByUserIdOrThrow(userId);
         String namespaceId = user.getNamespaceId();
         if (!groupRepository.existsAllByNamespaceIdAndGroupIdIn(namespaceId, groupIds)) {
-            throw new RuntimeException("One or more groups not found");
+            throw new CommonException(ErrorCode.GROUP_NOT_FOUND, "One or more groups not found");
         }
-        List<String> notIncludedGroup = userGroupRepository.findGroupIdsByUserIdAndGroupIdNotIn(userId, groupIds);
-        List<Group> groupsToAssign = groupRepository.findAllById(notIncludedGroup);
+        Set<String> assignedGroupIdSet = new HashSet<>(userGroupRepository.findGroupIdByUserIdAndGroupIdIn(userId, groupIds));
+        List<String> groupIdToAssign = groupIds.stream().filter(groupId -> !assignedGroupIdSet.contains(groupId))
+                .toList();
+        List<Group> groupsToAssign = groupRepository.findGroupByNamespaceIdAndGroupIdIn(namespaceId, groupIdToAssign);
         List<UserGroup> newUserGroups = groupsToAssign.stream()
                 .map(group -> UserGroup.builder()
                         .userId(userId)
@@ -81,10 +86,11 @@ public class UserGroupService {
                 .toList();
     }
 
+    @Transactional
     public void removeUserFromGroups(Long userId, List<String> groupIds) {
         userRepository.findByUserIdOrThrow(userId);
         Integer numberOfDeletedRecords = userGroupRepository.removeUserFromGroups(userId, groupIds);
-        log.info(MessageFormat.format("Remove {0} groups from user: {1}", numberOfDeletedRecords, userId));
+        log.info("Remove {} groups from user: {}", numberOfDeletedRecords, userId);
     }
 
     private Specification<Group> buildSpecToFindGroupByUserId(Long userId, String groupName, Boolean assignedOnly) {

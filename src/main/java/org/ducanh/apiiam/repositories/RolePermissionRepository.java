@@ -18,7 +18,11 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
     @Modifying
     void deleteAllByPermissionIdAndNamespaceId(String permissionId, String namespaceId);
 
-    List<RolePermission> findAllByNamespaceIdAndRoleId(String namespaceId, String roleId);
+    @Query("""
+        SELECT rp.permissionId FROM RolePermission rp
+                WHERE rp.namespaceId=:namespaceId AND rp.roleId=:roleId AND rp.permissionId IN (:permissionIds)
+        """)
+    List<String> findExistedPermissionIds(String roleId, String namespaceId, List<String> permissionIds);
 
     @Modifying
     @Query("DELETE FROM RolePermission rp WHERE rp.namespaceId = :namespaceId AND rp.roleId = :roleId AND rp.permissionId IN :permissionIds")
@@ -26,4 +30,6 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
             @Param("namespaceId") String namespaceId,
             @Param("roleId") String roleId,
             @Param("permissionIds") List<String> permissionIds);
+
+    List<RolePermission> findAllByNamespaceIdAndRoleId(String namespaceId, String roleId);
 }

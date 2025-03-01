@@ -1,6 +1,8 @@
 package org.ducanh.apiiam.repositories;
 
 import org.ducanh.apiiam.entities.User;
+import org.ducanh.apiiam.exceptions.CommonException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -19,7 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     default User findByUserIdOrThrow(Long userId) {
         User user = findByUserId(userId);
-        valArg(Objects.nonNull(user), () -> new RuntimeException("User not exist"));
+        valArg(Objects.nonNull(user), () -> new CommonException(ErrorCode.USER_ID_NOT_EXISTED, "userId: {0}", userId));
         return user;
     }
 }
