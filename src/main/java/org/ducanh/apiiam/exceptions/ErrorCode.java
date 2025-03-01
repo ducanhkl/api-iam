@@ -21,6 +21,8 @@ public enum ErrorCode {
     KEYPAIR_NOT_EXIST("013", ErrorGroup.KEYPAIR, HttpStatus.BAD_REQUEST, "Key pair not exist"),
     PERMISSION_NOT_EXIST("014", ErrorGroup.PERMISSION, HttpStatus.BAD_REQUEST, "Permission not exist"),
     ROLE_ID_DUPLICATED("015", ErrorGroup.ROLE, HttpStatus.BAD_REQUEST, "RoleId is duplicated"),
+    USER_ID_NOT_EXISTED("016", ErrorGroup.USER, HttpStatus.BAD_REQUEST, "UserId not exited"),
+    TOO_MANY_SESSION("017", ErrorGroup.SESSION, HttpStatus.TOO_MANY_REQUESTS, "Too many session"),
     ;
 
     private final String code;

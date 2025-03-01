@@ -4,10 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.entities.KeyPair;
 import org.ducanh.apiiam.entities.Session;
 import org.ducanh.apiiam.entities.User;
+import org.ducanh.apiiam.exceptions.CommonException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.repositories.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 
@@ -31,7 +34,7 @@ public class SessionService {
     public void checkMaxUserActiveSession(User user) {
         Integer countSessionByUserId = sessionRepository.countSessionByUserId(user.getUserId(), true);
         if (countSessionByUserId > maxUserActiveSession) {
-            throw new RuntimeException("Exceeded maximum number of sessions");
+            throw new CommonException(ErrorCode.TOO_MANY_SESSION, "Too many session");
         }
     }
 
@@ -61,8 +64,8 @@ public class SessionService {
     }
 
     public void revokeOldSession(Session session) {
-        valArg(!session.isRevoked(), () -> new RuntimeException("Token is invalid"));
-        valArg(session.isActive(), () -> new RuntimeException("Token inactive"));
+        valArg(!session.isRevoked(), () -> new CommonException(ErrorCode.INVALID_TOKEN, "Token is revoked"));
+        valArg(session.isActive(), () ->  new CommonException(ErrorCode.INVALID_TOKEN, "Token is inactive"));
         session.setRevoked(true);
         session.setActive(false);
         sessionRepository.save(session);
@@ -74,7 +77,8 @@ public class SessionService {
         sessionRepository.save(session);
     }
 
-    public void deactiveAllActiveSessions(User user) {
-
+    @Transactional
+    public void deactivateAllActiveSessions(User user) {
+        sessionRepository.logoutSession(user.getUserId());
     }
 }

@@ -1,7 +1,6 @@
 package org.ducanh.apiiam.services;
 
 import jakarta.persistence.criteria.Predicate;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.requests.CreateUserRequestDto;
 import org.ducanh.apiiam.dto.requests.IndexUserRequestParamsDto;
@@ -12,12 +11,12 @@ import org.ducanh.apiiam.dto.responses.UserResponseDto;
 import org.ducanh.apiiam.entities.PasswordAlg;
 import org.ducanh.apiiam.entities.User;
 import org.ducanh.apiiam.entities.UserStatus;
-import org.ducanh.apiiam.repositories.SessionRepository;
+import org.ducanh.apiiam.exceptions.CommonException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.repositories.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -100,7 +99,7 @@ public class UserService {
     public UserResponseDto getUser(Long userId) {
         return userRepository.findById(userId)
                 .map(User::toUserResponseDto)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new CommonException(ErrorCode.USER_ID_NOT_EXISTED, "UserId: {0}", userId));
     }
 
     @Transactional
@@ -118,7 +117,7 @@ public class UserService {
     @Transactional
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new CommonException(ErrorCode.USER_ID_NOT_EXISTED, "UserId: {0}", userId));
         user.setDeleted(true);
     }
 
@@ -130,19 +129,19 @@ public class UserService {
         valUserInfoForChangePassword(user);
         PasswordAlg passwordAlg = user.getPwdAlg();
         if (!passwordAlg.compare(updatePasswordRequestDto.oldPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("Old password does not match");
+            throw new CommonException(ErrorCode.INVALID_PASSWORD, "Old password does not match");
         }
         String hashed = passwordAlg.hash(updatePasswordRequestDto.newPassword());
         user.setPasswordHash(hashed);
         if (updatePasswordRequestDto.isLogoutOtherSession()) {
-            sessionService.deactiveAllActiveSessions(user);
+            sessionService.deactivateAllActiveSessions(user);
         }
         return jwtTokenService.issueJwtTokens(user, userAgent, ipAddress);
     }
 
     private void valUserInfoForChangePassword(User user) {
-        valArg(!user.getDeleted(), () -> new RuntimeException("User deleted"));
-        valArg(user.getIsVerified(), () -> new RuntimeException("User not verified"));
+        valArg(!user.getDeleted(), () -> new CommonException(ErrorCode.USER_STATUS_NOT_VALID, "User deleted"));
+        valArg(user.getIsVerified(), () -> new CommonException(ErrorCode.USER_STATUS_NOT_VALID, "User not verified"));
     }
 
 }

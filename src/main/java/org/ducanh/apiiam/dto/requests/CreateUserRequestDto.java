@@ -21,8 +21,6 @@ public record CreateUserRequestDto(@NotBlank(message = "Username is required")
                                    String phoneNumber,
                                    @NotNull(message = "Namespace ID is required")
                                    String namespaceId,
-                                   @NotNull(message = "Created by user ID is required")
-                                   Long createdByUserId,
                                    @NotNull(message = "Should the user be verified immediately")
                                    Boolean isVerified,
                                    Boolean mfaEnabled,
