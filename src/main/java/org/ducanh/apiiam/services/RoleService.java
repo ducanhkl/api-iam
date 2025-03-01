@@ -8,6 +8,8 @@ import org.ducanh.apiiam.dto.responses.CreateRoleResponseDto;
 import org.ducanh.apiiam.dto.responses.RoleResponseDto;
 import org.ducanh.apiiam.dto.responses.UpdateRoleResponseDto;
 import org.ducanh.apiiam.entities.Role;
+import org.ducanh.apiiam.exceptions.CommonException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -44,8 +46,8 @@ public class RoleService {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(criteriaBuilder.equal(root.get(Role.Fields.namespaceId), namespaceId));
             if (Objects.nonNull(roleName) && !roleName.trim().isEmpty()) {
-                predicates.add(criteriaBuilder.like(root.get(Role.Fields.roleName),
-                        "%" + roleName.toLowerCase().trim() + "&"));
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get(Role.Fields.roleName)),
+                        "%" + roleName.toLowerCase().trim() + "%"));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         });
@@ -55,14 +57,16 @@ public class RoleService {
 
     public RoleResponseDto getRole(String namespaceId, String roleId) {
         Role role = roleRepository.findROleByNamespaceIdAndRoleId(namespaceId, roleId)
-                .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+                .orElseThrow(() -> new CommonException(ErrorCode.ROLE_NOT_FOUND,
+                        "Role not found with id: {0}, namespaceId: {1}", roleId, namespaceId));
         return role.toResponseDto();
     }
 
     @Transactional
     public UpdateRoleResponseDto updateRole(String namespaceId, String roleId, UpdateRoleRequestDto requestDto) {
         Role role = roleRepository.findROleByNamespaceIdAndRoleId(namespaceId, roleId)
-                .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+                .orElseThrow(() -> new CommonException(ErrorCode.ROLE_NOT_FOUND,
+                        "Role not found with id: {0}, namespaceId: {1}", roleId, namespaceId));
         role.update(requestDto);
         return role.toUpdateResponseDto();
     }

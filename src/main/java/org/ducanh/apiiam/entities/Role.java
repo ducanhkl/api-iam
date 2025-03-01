@@ -50,6 +50,7 @@ public class Role {
 
     public static Role from(String namespaceId, CreateRoleRequestDto requestDto) {
         return Role.builder()
+                .roleId(requestDto.roleId())
                 .roleName(requestDto.roleName())
                 .description(requestDto.description())
                 .namespaceId(namespaceId)

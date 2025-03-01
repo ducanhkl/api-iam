@@ -1,6 +1,7 @@
 package org.ducanh.apiiam.exceptions;
 
 public enum ErrorGroup {
+    VALIDATION_ERROR,
     USER,
     SESSION,
     OTP,

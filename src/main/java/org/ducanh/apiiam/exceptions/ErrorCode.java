@@ -7,7 +7,7 @@ import java.text.MessageFormat;
 public enum ErrorCode {
 
     UNKNOWN_ERROR("001", ErrorGroup.UNKNOWN, HttpStatus.INTERNAL_SERVER_ERROR, "Unknown error"),
-    VALIDATION_ERROR("002", ErrorGroup.UNKNOWN, HttpStatus.BAD_REQUEST, "Validation error"),
+    VALIDATION_ERROR("002", ErrorGroup.VALIDATION_ERROR, HttpStatus.BAD_REQUEST, "Validation error"),
     NAMESPACE_NOT_EXISTED("003", ErrorGroup.NAMESPACE, HttpStatus.BAD_REQUEST, "Namespace not existed"),
     USERNAME_NOT_EXISTED("004", ErrorGroup.USER, HttpStatus.BAD_REQUEST, "Username not existed"),
     INVALID_OTP("005", ErrorGroup.OTP, HttpStatus.BAD_REQUEST, "Invalid OTP"),
@@ -20,6 +20,7 @@ public enum ErrorCode {
     NAMESPACE_ID_DUPLICATED("012", ErrorGroup.NAMESPACE, HttpStatus.BAD_REQUEST, "NamespaceId duplicated"),
     KEYPAIR_NOT_EXIST("013", ErrorGroup.KEYPAIR, HttpStatus.BAD_REQUEST, "Key pair not exist"),
     PERMISSION_NOT_EXIST("014", ErrorGroup.PERMISSION, HttpStatus.BAD_REQUEST, "Permission not exist"),
+    ROLE_ID_DUPLICATED("015", ErrorGroup.ROLE, HttpStatus.BAD_REQUEST, "RoleId is duplicated"),
     ;
 
     private final String code;

@@ -167,7 +167,7 @@ public class AuthControllerE2eTest {
                 .post("/auth/register")
                 .then()
                 .statusCode(400)
-                .body("errorCode", containsString("UNKNOWN_002_400"));
+                .body("errorCode", containsString("VALIDATION_ERROR_002_400"));
     }
 
     private Pair<String, String> registerAndVerifyUser(String username, String password, String email, String phone) {

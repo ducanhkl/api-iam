@@ -15,8 +15,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,7 +93,7 @@ class PermissionControllerE2eTest {
                 .post(BASE_PATH, NAMESPACE_ID)
                 .then()
                 .statusCode(400)
-                .body("errorCode", equalTo("UNKNOWN_002_400"))
+                .body("errorCode", equalTo("VALIDATION_ERROR_002_400"))
                 .body("shortDescriptions", equalTo("Validation error"));
     }
 
@@ -196,11 +194,8 @@ class PermissionControllerE2eTest {
 
     @Test
     void whenIndexPermissions_thenSuccess() {
-        List<Permission> permissions = List.of(
-                createTestPermission("permission-1", "Test Permission 1"),
-                createTestPermission("permission-2", "Test Permission 2")
-        );
-
+        createTestPermission("permission-1", "Test Permission 1");
+        createTestPermission("permission-2", "Test Permission 2");
         given()
                 .queryParam("page", 0)
                 .queryParam("size", 10)
