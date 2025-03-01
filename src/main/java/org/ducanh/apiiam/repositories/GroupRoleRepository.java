@@ -15,4 +15,10 @@ public interface GroupRoleRepository extends JpaRepository<GroupRole, Long> {
     @Modifying
     @Query("DELETE FROM GroupRole gr WHERE gr.namespaceId = :namespaceId AND gr.groupId = :groupId AND gr.roleId IN :roleIds")
     void deleteAllByNamespaceIdAndGroupIdAndRoleIdIn(String namespaceId, String groupId, List<String> roleIds);
+
+    @Modifying
+    void deleteAllByRoleIdAndNamespaceId(String roleId, String namespaceId);
+
+    @Modifying
+    void deleteAllByGroupIdAndNamespaceId(String groupId, String namespaceId);
 }

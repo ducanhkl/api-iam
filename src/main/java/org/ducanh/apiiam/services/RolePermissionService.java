@@ -9,6 +9,8 @@ import org.ducanh.apiiam.dto.responses.RolePermissionResponseDto;
 import org.ducanh.apiiam.entities.Permission;
 import org.ducanh.apiiam.entities.Role;
 import org.ducanh.apiiam.entities.RolePermission;
+import org.ducanh.apiiam.exceptions.CommonException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.repositories.PermissionRepository;
 import org.ducanh.apiiam.repositories.RolePermissionRepository;
 import org.ducanh.apiiam.repositories.RoleRepository;
@@ -42,11 +44,13 @@ public class RolePermissionService {
 
     public void assignPermissionsToRole(String namespaceId, String roleId, List<String> permissionIds) {
         roleRepository.findROleByNamespaceIdAndRoleId(namespaceId, roleId)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new CommonException(ErrorCode.ROLE_NOT_FOUND,
+                        "roleId: {0}, namespaceId: {1}", roleId, namespaceId));
 
         long existingPermissionsCount = permissionRepository.countAllByNamespaceIdAndPermissionIdIn(namespaceId, permissionIds);
         if (existingPermissionsCount != permissionIds.size()) {
-            throw new RuntimeException("One or more permissions not found");
+            throw new CommonException(ErrorCode.PERMISSION_NOT_EXIST,
+                    "Some permission not exists");
         }
 
         List<String> existingPermissionIds = rolePermissionRepository.findAllByNamespaceIdAndRoleId(namespaceId, roleId)
@@ -68,7 +72,8 @@ public class RolePermissionService {
 
     public void removePermissionsFromRole(String namespaceId, String roleId, List<String> permissionIds) {
         if (!roleRepository.existsByRoleIdAndNamespaceId(roleId, namespaceId)) {
-            throw new RuntimeException("Role not found");
+            throw new CommonException(ErrorCode.ROLE_NOT_FOUND,
+                    "roleId: {0}, namespaceId: {1}", roleId, namespaceId);
         }
         rolePermissionRepository.deleteAllByNamespaceIdAndRoleIdAndPermissionIdIn(namespaceId, roleId, permissionIds);
     }
@@ -80,7 +85,8 @@ public class RolePermissionService {
             Pageable pageable
     ) {
         if (!roleRepository.existsByRoleIdAndNamespaceId(roleId, namespaceId)) {
-            throw new RuntimeException("Role not found");
+            throw new CommonException(ErrorCode.ROLE_NOT_FOUND,
+                    "roleId: {0}, namespaceId: {1}", roleId, namespaceId);
         }
 
         Specification<Permission> spec = (root, query, cb) -> {
@@ -123,7 +129,8 @@ public class RolePermissionService {
             Pageable pageable
     ) {
         if (!permissionRepository.existsByPermissionIdAndNamespaceId(permissionId, namespaceId)) {
-            throw new RuntimeException("Permission not found");
+            throw new CommonException(ErrorCode.PERMISSION_NOT_EXIST,
+                    "permissionId: {0} namespaceId: {1}", permissionId, namespaceId);
         }
 
         Specification<Role> spec = (root, query, cb) -> {

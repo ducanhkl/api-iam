@@ -30,4 +30,7 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Long>, Jpa
         WHERE ug.userId = :userId AND ug.groupId in :groupIds
         """)
     int removeUserFromGroups(Long userId, List<String> groupIds);
+
+    @Modifying
+    void deleteAllByGroupIdAndNamespaceId(String groupId, String namespaceId);
 }

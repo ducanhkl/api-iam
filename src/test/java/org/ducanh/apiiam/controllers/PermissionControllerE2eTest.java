@@ -7,17 +7,21 @@ import io.restassured.http.ContentType;
 import org.ducanh.apiiam.ContainerConfig;
 import org.ducanh.apiiam.entities.Permission;
 import org.ducanh.apiiam.repositories.PermissionRepository;
+import org.ducanh.apiiam.repositories.RolePermissionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -33,11 +37,15 @@ class PermissionControllerE2eTest {
     private static final String NAMESPACE_ID = "test-namespace";
     private static final String BASE_PATH = "/permission/namespace-id/{namespaceId}/";
 
+    @MockitoSpyBean
+    private RolePermissionRepository rolePermissionRepository;
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
         permissionRepository.deleteAll();
+        Mockito.reset(rolePermissionRepository);
     }
 
     private Permission createTestPermission(String permissionId, String permissionName) {
@@ -177,7 +185,8 @@ class PermissionControllerE2eTest {
                 .delete(BASE_PATH + "permission-id/{permissionId}", NAMESPACE_ID, permission.getPermissionId())
                 .then()
                 .statusCode(204);
-
+        verify(rolePermissionRepository, times(1))
+                .deleteAllByPermissionIdAndNamespaceId(any(), any());
         assertFalse(permissionRepository.existsById(permission.getPermissionId()));
     }
 

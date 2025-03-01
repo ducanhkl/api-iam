@@ -10,6 +10,8 @@ import org.ducanh.apiiam.dto.responses.UpdateRoleResponseDto;
 import org.ducanh.apiiam.entities.Role;
 import org.ducanh.apiiam.exceptions.CommonException;
 import org.ducanh.apiiam.exceptions.ErrorCode;
+import org.ducanh.apiiam.repositories.GroupRoleRepository;
+import org.ducanh.apiiam.repositories.RolePermissionRepository;
 import org.ducanh.apiiam.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,11 +28,17 @@ import java.util.Objects;
 @Slf4j
 public class RoleService {
 
-    public final RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
+    private final RolePermissionRepository rolePermissionRepository;
+    private final GroupRoleRepository groupRoleRepository;
 
     @Autowired
-    public RoleService(RoleRepository roleRepository) {
+    public RoleService(RoleRepository roleRepository,
+                       RolePermissionRepository rolePermissionRepository,
+                       GroupRoleRepository groupRoleRepository) {
         this.roleRepository = roleRepository;
+        this.rolePermissionRepository = rolePermissionRepository;
+        this.groupRoleRepository = groupRoleRepository;
     }
 
     public CreateRoleResponseDto createRole(String namespaceId, CreateRoleRequestDto requestDto) {
@@ -75,6 +83,8 @@ public class RoleService {
     public void deleteRole(String namespaceId, String roleId) {
         Role role = roleRepository.findROleByNamespaceIdAndRoleId(namespaceId, roleId)
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+        rolePermissionRepository.deleteAllByRoleIdAndNamespaceId(roleId, namespaceId);
+        groupRoleRepository.deleteAllByRoleIdAndNamespaceId(roleId, namespaceId);
         roleRepository.delete(role);
     }
 

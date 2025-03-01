@@ -9,6 +9,7 @@ import org.ducanh.apiiam.entities.Permission;
 import org.ducanh.apiiam.exceptions.CommonException;
 import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.repositories.PermissionRepository;
+import org.ducanh.apiiam.repositories.RolePermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,10 +26,13 @@ import static  org.ducanh.apiiam.exceptions.ErrorCode.*;
 @Service
 public class PermissionService {
     private final PermissionRepository permissionRepository;
+    private final RolePermissionRepository rolePermissionRepository;
 
     @Autowired
-    public PermissionService(PermissionRepository permissionRepository) {
+    public PermissionService(PermissionRepository permissionRepository,
+                             RolePermissionRepository rolePermissionRepository) {
         this.permissionRepository = permissionRepository;
+        this.rolePermissionRepository = rolePermissionRepository;
     }
 
     public PermissionResponseDto createPermission(String namespaceId, CreatePermissionRequestDto request) {
@@ -68,6 +72,7 @@ public class PermissionService {
     public void deletePermission(String namespaceId, String permissionId) {
         Permission permission = permissionRepository.findPermissionByNamespaceIdAndPermissionId(namespaceId, permissionId)
                 .orElseThrow(() -> new CommonException(PERMISSION_NOT_EXIST, "Permission not found with id: {0}", permissionId));
+        rolePermissionRepository.deleteAllByPermissionIdAndNamespaceId(permissionId, namespaceId);
         permissionRepository.delete(permission);
     }
 

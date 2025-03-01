@@ -9,6 +9,8 @@ import org.ducanh.apiiam.entities.Group;
 import org.ducanh.apiiam.exceptions.CommonException;
 import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.repositories.GroupRepository;
+import org.ducanh.apiiam.repositories.GroupRoleRepository;
+import org.ducanh.apiiam.repositories.UserGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,10 +27,16 @@ import java.util.List;
 public class GroupService {
 
     private final GroupRepository groupRepository;
+    private final UserGroupRepository userGroupRepository;
+    private final GroupRoleRepository groupRoleRepository;
 
     @Autowired
-    public GroupService(GroupRepository groupRepository) {
+    public GroupService(GroupRepository groupRepository,
+                        UserGroupRepository userGroupRepository,
+                        GroupRoleRepository groupRoleRepository) {
         this.groupRepository = groupRepository;
+        this.userGroupRepository = userGroupRepository;
+        this.groupRoleRepository = groupRoleRepository;
     }
 
     public GroupResponseDto createGroup(String namespaceId, CreateGroupRequestDto request) {
@@ -67,10 +75,13 @@ public class GroupService {
                 .map(Group::toGroupResponseDto);
     }
 
+    @Transactional
     public void deleteGroup(String namespaceId, String groupId) {
         Group group = groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, groupId)
                 .orElseThrow(() -> new CommonException(ErrorCode.GROUP_NOT_FOUND,
                         "GroupId {0}, namespace: {1} not found", groupId, namespaceId));
+        groupRoleRepository.deleteAllByGroupIdAndNamespaceId(groupId, namespaceId);
+        userGroupRepository.deleteAllByGroupIdAndNamespaceId(groupId, namespaceId);
         groupRepository.delete(group);
     }
 

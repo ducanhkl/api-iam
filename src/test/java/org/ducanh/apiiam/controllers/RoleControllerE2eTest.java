@@ -6,14 +6,19 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import org.ducanh.apiiam.ContainerConfig;
 import org.ducanh.apiiam.entities.Role;
+import org.ducanh.apiiam.repositories.GroupRoleRepository;
+import org.ducanh.apiiam.repositories.PermissionRepository;
+import org.ducanh.apiiam.repositories.RolePermissionRepository;
 import org.ducanh.apiiam.repositories.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.List;
 
@@ -21,6 +26,8 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -33,10 +40,19 @@ class RoleControllerE2eTest {
     @Autowired
     private RoleRepository roleRepository;
 
+    @MockitoSpyBean
+    private GroupRoleRepository groupRoleRepository;
+    @MockitoSpyBean
+    private RolePermissionRepository rolePermissionRepository;
+    @Autowired
+    private PermissionRepository permissionRepository;
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+        Mockito.reset(groupRoleRepository);
+        Mockito.reset(rolePermissionRepository);
         roleRepository.deleteAll();
     }
 
@@ -168,7 +184,10 @@ class RoleControllerE2eTest {
                 .delete("/role/namespace-id/{namespaceId}/role-id/{roleId}", "test-namespace", "test-role")
                 .then()
                 .statusCode(204);
-
+        verify(groupRoleRepository, times(1))
+                .deleteAllByRoleIdAndNamespaceId(any(), any());
+        verify(rolePermissionRepository, times(1))
+                .deleteAllByRoleIdAndNamespaceId(any(), any());
         assertFalse(roleRepository.existsById("test-role"));
     }
 

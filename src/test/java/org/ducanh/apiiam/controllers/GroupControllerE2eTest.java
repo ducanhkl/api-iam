@@ -8,6 +8,8 @@ import io.restassured.http.ContentType;
 import org.ducanh.apiiam.ContainerConfig;
 import org.ducanh.apiiam.entities.Group;
 import org.ducanh.apiiam.repositories.GroupRepository;
+import org.ducanh.apiiam.repositories.GroupRoleRepository;
+import org.ducanh.apiiam.repositories.UserGroupRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +17,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -26,6 +30,11 @@ public class GroupControllerE2eTest {
 
     @Autowired
     private GroupRepository groupRepository;
+
+    @MockitoSpyBean
+    private GroupRoleRepository groupRoleRepository;
+    @MockitoSpyBean
+    private UserGroupRepository userGroupRepository;
 
     @LocalServerPort
     private int port;
@@ -159,12 +168,15 @@ public class GroupControllerE2eTest {
                 .namespaceId(NAMESPACE_ID)
                 .build();
         groupRepository.save(group);
-
         given()
                 .when()
                 .delete("/group/namespace-id/" + NAMESPACE_ID + "/group-id/delete-group")
                 .then()
                 .statusCode(204);
+        verify(groupRoleRepository, times(1))
+                .deleteAllByGroupIdAndNamespaceId(any(), any());
+        verify(userGroupRepository, times(1))
+                .deleteAllByGroupIdAndNamespaceId(any(), any());
     }
 
     @Test
