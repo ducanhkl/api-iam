@@ -21,14 +21,14 @@ import static org.ducanh.apiiam.Constants.*;
 
 
 @RestController
-@RequestMapping("permission/namespace-id/{namespaceId}/")
+@RequestMapping("/permission/namespace-id/{namespaceId}/")
 @RequiredArgsConstructor
 @Slf4j
 public class PermissionController {
 
     private final PermissionService permissionService;
 
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<PermissionResponseDto> createPermission(
             @Valid @RequestBody CreatePermissionRequestDto request,
             @PathVariable String namespaceId) {
@@ -37,7 +37,7 @@ public class PermissionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("permission-id/{permissionId}")
+    @GetMapping("/permission-id/{permissionId}")
     public ResponseEntity<PermissionResponseDto> getPermission(@PathVariable String permissionId,
                                                                @PathVariable String namespaceId) {
         PermissionResponseDto response = permissionService.getPermission(namespaceId, permissionId);
@@ -59,7 +59,7 @@ public class PermissionController {
                 .body(permissionPage.getContent());
     }
 
-    @PutMapping("permission-id/{permissionId}")
+    @PutMapping("/permission-id/{permissionId}")
     public ResponseEntity<PermissionResponseDto> updatePermission(
             @PathVariable String permissionId,
             @PathVariable String namespaceId,
@@ -68,7 +68,7 @@ public class PermissionController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("permission-id/{permissionId}")
+    @DeleteMapping("/permission-id/{permissionId}")
     public ResponseEntity<Void> deletePermission(@PathVariable String permissionId,
                                                  @PathVariable String namespaceId) {
         permissionService.deletePermission(namespaceId, permissionId);

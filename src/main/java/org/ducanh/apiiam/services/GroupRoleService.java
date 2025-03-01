@@ -3,10 +3,11 @@ package org.ducanh.apiiam.services;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.responses.GroupResponseDto;
 import org.ducanh.apiiam.dto.responses.GroupRoleResponseDto;
-import org.ducanh.apiiam.dto.responses.RoleResponseDto;
 import org.ducanh.apiiam.entities.Group;
 import org.ducanh.apiiam.entities.GroupRole;
 import org.ducanh.apiiam.entities.Role;
+import org.ducanh.apiiam.exceptions.CommonException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.repositories.GroupRepository;
 import org.ducanh.apiiam.repositories.GroupRoleRepository;
 import org.ducanh.apiiam.repositories.RoleRepository;
@@ -43,12 +44,15 @@ public class GroupRoleService {
 
     public void assignRolesToGroup(String namespaceId, String groupId, List<String> roleIds) {
         Group group = groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
+                .orElseThrow(() -> new CommonException(ErrorCode.GROUP_NOT_FOUND,
+                        "GroupId {0}, namespace: {1} not found", groupId, namespaceId));
 
         // Verify all roles exist using count
         long existingRolesCount = roleRepository.countAllByNamespaceIdAndRoleIdIn(namespaceId, roleIds);
         if (existingRolesCount != roleIds.size()) {
-            throw new RuntimeException("One or more roles not found");
+            log.info("Roles in request size: {}, existing role count: {}", roleIds.size(), existingRolesCount);
+            throw new CommonException(ErrorCode.ROLE_NOT_FOUND,
+                    "Some role not exist");
         }
 
         // Filter out already assigned roles
@@ -71,7 +75,8 @@ public class GroupRoleService {
 
     public void removeRolesFromGroup(String namespaceId, String groupId, List<String> roleIds) {
         if (!groupRepository.existsByGroupIdAndNamespaceId(groupId, namespaceId)) {
-            throw new RuntimeException("Group not found");
+            throw new CommonException(ErrorCode.GROUP_NOT_FOUND,
+                    "GroupId {0}, namespace: {1} not found", groupId, namespaceId);
         }
         groupRoleRepository.deleteAllByNamespaceIdAndGroupIdAndRoleIdIn(namespaceId, groupId, roleIds);
     }
@@ -82,8 +87,9 @@ public class GroupRoleService {
             String roleName,
             Pageable pageable
     ) {
-        if (!groupRepository.existsById(groupId)) {
-            throw new RuntimeException("Group not found");
+        if (!groupRepository.existsByGroupIdAndNamespaceId(groupId, namespaceId)) {
+            throw new CommonException(ErrorCode.GROUP_NOT_FOUND,
+                    "GroupId {0}, namespace: {1} not found", groupId, namespaceId);
         }
 
         Specification<Role> spec = (root, query, cb) -> {
@@ -121,7 +127,7 @@ public class GroupRoleService {
             Pageable pageable
     ) {
         if (!roleRepository.existsById(roleId)) {
-            throw new RuntimeException("Role not found");
+            throw new CommonException(ErrorCode.ROLE_NOT_FOUND, "RoleId: {0} not found", roleId);
         }
 
         Specification<Group> spec = (root, query, cb) -> {

@@ -6,6 +6,8 @@ import org.ducanh.apiiam.dto.requests.CreateGroupRequestDto;
 import org.ducanh.apiiam.dto.requests.UpdateGroupRequestDto;
 import org.ducanh.apiiam.dto.responses.GroupResponseDto;
 import org.ducanh.apiiam.entities.Group;
+import org.ducanh.apiiam.exceptions.CommonException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.repositories.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -45,7 +47,8 @@ public class GroupService {
     @Transactional
     public GroupResponseDto updateGroup(String namespaceId, String groupId, UpdateGroupRequestDto request) {
         Group group = groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found with id: " + groupId));
+                .orElseThrow(() -> new CommonException(ErrorCode.GROUP_NOT_FOUND,
+                        "GroupId {0}, namespace: {1} not found", groupId, namespaceId));
         group.setGroupName(request.groupName());
         group.setDescription(request.description());
         return group.toGroupResponseDto();
@@ -55,7 +58,8 @@ public class GroupService {
                                      String groupId) {
         return groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, groupId)
                 .map(Group::toGroupResponseDto)
-                .orElseThrow(() -> new RuntimeException("Group not found with id: " + groupId));
+                .orElseThrow(() -> new CommonException(ErrorCode.GROUP_NOT_FOUND,
+                        "GroupId {0}, namespace: {1} not found", groupId, namespaceId));
     }
 
     public Page<GroupResponseDto> indexGroups(String namespaceId, String groupName, Pageable pageable) {
@@ -63,9 +67,10 @@ public class GroupService {
                 .map(Group::toGroupResponseDto);
     }
 
-    public void deleteGroup(String namespaceId, String id) {
-        Group group = groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, id)
-                .orElseThrow(() -> new RuntimeException("Group not found with id: " + id));
+    public void deleteGroup(String namespaceId, String groupId) {
+        Group group = groupRepository.findGroupByNamespaceIdAndGroupId(namespaceId, groupId)
+                .orElseThrow(() -> new CommonException(ErrorCode.GROUP_NOT_FOUND,
+                        "GroupId {0}, namespace: {1} not found", groupId, namespaceId));
         groupRepository.delete(group);
     }
 
@@ -82,6 +87,4 @@ public class GroupService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
-
-
 }

@@ -6,6 +6,8 @@ import org.ducanh.apiiam.dto.requests.IndexPermissionRequestParamsDto;
 import org.ducanh.apiiam.dto.requests.UpdatePermissionRequestDto;
 import org.ducanh.apiiam.dto.responses.PermissionResponseDto;
 import org.ducanh.apiiam.entities.Permission;
+import org.ducanh.apiiam.exceptions.CommonException;
+import org.ducanh.apiiam.exceptions.ErrorCode;
 import org.ducanh.apiiam.repositories.PermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,6 +19,8 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static  org.ducanh.apiiam.exceptions.ErrorCode.*;
 
 @Service
 public class PermissionService {
@@ -42,7 +46,7 @@ public class PermissionService {
     @Transactional
     public PermissionResponseDto updatePermission(String namespaceId, String permissionId, UpdatePermissionRequestDto request) {
         Permission permission = permissionRepository.findPermissionByNamespaceIdAndPermissionId(namespaceId, permissionId)
-                .orElseThrow(() -> new RuntimeException("Permission not found with id: " + permissionId));
+                .orElseThrow(() -> new CommonException(PERMISSION_NOT_EXIST, "Permission not found with id: {0}", permissionId));
 
         permission.setPermissionName(request.permissionName());
         permission.setDescription(request.description());
@@ -52,7 +56,7 @@ public class PermissionService {
     public PermissionResponseDto getPermission(String namespaceId, String permissionId) {
         return permissionRepository.findPermissionByNamespaceIdAndPermissionId(namespaceId, permissionId)
                 .map(Permission::toPermissionResponseDto)
-                .orElseThrow(() -> new RuntimeException("Permission not found with id: " + permissionId));
+                .orElseThrow(() -> new CommonException(PERMISSION_NOT_EXIST, "Permission not found with id: {0}", permissionId));
     }
 
     public Page<PermissionResponseDto> indexPermissions(String namespaceId, IndexPermissionRequestParamsDto params, Pageable pageable) {
@@ -63,7 +67,7 @@ public class PermissionService {
     @Transactional
     public void deletePermission(String namespaceId, String permissionId) {
         Permission permission = permissionRepository.findPermissionByNamespaceIdAndPermissionId(namespaceId, permissionId)
-                .orElseThrow(() -> new RuntimeException("Permission not found with id: " + permissionId));
+                .orElseThrow(() -> new CommonException(PERMISSION_NOT_EXIST, "Permission not found with id: {0}", permissionId));
         permissionRepository.delete(permission);
     }
 

@@ -7,6 +7,7 @@ import org.ducanh.apiiam.dto.requests.IndexNamespaceRequestParamsDto;
 import org.ducanh.apiiam.dto.requests.UpdateNamespaceRequestDto;
 import org.ducanh.apiiam.dto.responses.NamespaceResponseDto;
 import org.ducanh.apiiam.entities.Namespace;
+import org.ducanh.apiiam.exceptions.CommonException;
 import org.ducanh.apiiam.repositories.KeyPairRepository;
 import org.ducanh.apiiam.repositories.NamespaceRepository;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,9 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static org.ducanh.apiiam.exceptions.ErrorCode.*;
 
 
 @Service
@@ -33,14 +36,14 @@ public class NamespaceService {
     }
 
     public NamespaceResponseDto createNamespace(CreateNamespaceRequestDto request) {
-        // Check for duplicate namespace name
-        if (namespaceRepository.existsByNamespaceName(request.namespaceName())) {
-            throw new RuntimeException("Namespace with name " + request.namespaceName() + " already exists");
+        Optional<?> namespaceOpt = namespaceRepository.findById(request.namespaceId());
+
+        if (namespaceOpt.isPresent()) {
+            throw new CommonException(NAMESPACE_ID_DUPLICATED, "NamespaceId: {0} is duplicated", request.namespaceId());
         }
 
-        // Check if keyPair exists
         keyPairRepository.findById(request.keyPairId())
-                .orElseThrow(() -> new RuntimeException("KeyPair not found with id: " + request.keyPairId()));
+                .orElseThrow(() -> new CommonException(KEYPAIR_NOT_EXIST, "KeyPair not found with id: {0}", request.keyPairId()));
 
         Namespace namespace = Namespace.builder()
                 .namespaceId(request.namespaceId())
@@ -56,17 +59,10 @@ public class NamespaceService {
     @Transactional
     public NamespaceResponseDto updateNamespace(String id, UpdateNamespaceRequestDto request) {
         Namespace namespace = namespaceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Namespace not found with id: " + id));
+                .orElseThrow(() -> new CommonException(NAMESPACE_NOT_EXISTED, "NamespaceId: {0} not exist", id));
 
-        // Check for duplicate namespace name if it's different from current
-        if (!namespace.getNamespaceName().equals(request.namespaceName()) &&
-                namespaceRepository.existsByNamespaceName(request.namespaceName())) {
-            throw new RuntimeException("Namespace with name " + request.namespaceName() + " already exists");
-        }
-
-        // Check if keyPair exists
         keyPairRepository.findById(request.keyPairId())
-                .orElseThrow(() -> new RuntimeException("KeyPair not found with id: " + request.keyPairId()));
+                .orElseThrow(() -> new CommonException(KEYPAIR_NOT_EXIST, "KeyPair not found with id: {0}", request.keyPairId()));
 
         namespace.setNamespaceName(request.namespaceName());
         namespace.setDescription(request.description());
@@ -78,7 +74,7 @@ public class NamespaceService {
     public NamespaceResponseDto getNamespace(String id) {
         return namespaceRepository.findById(id)
                 .map(Namespace::toNamespaceResponseDto)
-                .orElseThrow(() -> new RuntimeException("Namespace not found with id: " + id));
+                .orElseThrow(() -> new CommonException(NAMESPACE_NOT_EXISTED, "NamespaceId: {0} not exist", id));
     }
 
     public Page<NamespaceResponseDto> indexNamespaces(IndexNamespaceRequestParamsDto params, Pageable pageable) {

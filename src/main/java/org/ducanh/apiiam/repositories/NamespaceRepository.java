@@ -11,7 +11,6 @@ import javax.naming.Name;
 public interface NamespaceRepository extends JpaRepository<Namespace, String>, JpaSpecificationExecutor<Namespace> {
 
     Namespace findByNamespaceId(String namespaceId);
-    boolean existsByNamespaceName(String namespaceName);
 
     default void existOrThrowById(String namespaceId) {
         if (!existsById(namespaceId)) {

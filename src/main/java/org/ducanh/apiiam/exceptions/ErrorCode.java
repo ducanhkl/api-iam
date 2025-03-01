@@ -13,7 +13,15 @@ public enum ErrorCode {
     INVALID_OTP("005", ErrorGroup.OTP, HttpStatus.BAD_REQUEST, "Invalid OTP"),
     USER_STATUS_NOT_VALID("006", ErrorGroup.USER, HttpStatus.UNAUTHORIZED, "User status not valid"),
     INVALID_PASSWORD("007", ErrorGroup.PASSWORD, HttpStatus.UNAUTHORIZED, "Invalid password"),
-    INVALID_TOKEN("008", ErrorGroup.TOKEN, HttpStatus.UNAUTHORIZED, "Invalid token");
+    INVALID_TOKEN("008", ErrorGroup.TOKEN, HttpStatus.UNAUTHORIZED, "Invalid token"),
+    GROUP_NOT_FOUND("009", ErrorGroup.GROUP, HttpStatus.BAD_REQUEST, "Group not found"),
+    GROUP_INFO_DUPLICATED("010", ErrorGroup.GROUP, HttpStatus.BAD_REQUEST, "Group info duplicated"),
+    ROLE_NOT_FOUND("011", ErrorGroup.ROLE, HttpStatus.BAD_REQUEST, "Role not found"),
+    NAMESPACE_ID_DUPLICATED("012", ErrorGroup.NAMESPACE, HttpStatus.BAD_REQUEST, "NamespaceId duplicated"),
+    KEYPAIR_NOT_EXIST("013", ErrorGroup.KEYPAIR, HttpStatus.BAD_REQUEST, "Key pair not exist"),
+    PERMISSION_NOT_EXIST("014", ErrorGroup.PERMISSION, HttpStatus.BAD_REQUEST, "Permission not exist"),
+    ;
+
     private final String code;
     private final ErrorGroup errorGroup;
     private final HttpStatus httpStatus;

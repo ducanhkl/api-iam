@@ -40,9 +40,9 @@ public class NamespaceController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<NamespaceResponseDto> getNamespace(@PathVariable String id) {
-        NamespaceResponseDto response = namespaceService.getNamespace(id);
+    @GetMapping("/{namespaceId}")
+    public ResponseEntity<NamespaceResponseDto> getNamespace(@PathVariable String namespaceId) {
+        NamespaceResponseDto response = namespaceService.getNamespace(namespaceId);
         return ResponseEntity.ok(response);
     }
 
@@ -60,11 +60,11 @@ public class NamespaceController {
                 .body(namespacePage.getContent());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{namespaceId}")
     public ResponseEntity<NamespaceResponseDto> updateNamespace(
-            @PathVariable String id,
+            @PathVariable String namespaceId,
             @Valid @RequestBody UpdateNamespaceRequestDto request) {
-        NamespaceResponseDto response = namespaceService.updateNamespace(id, request);
+        NamespaceResponseDto response = namespaceService.updateNamespace(namespaceId, request);
         return ResponseEntity.ok(response);
     }
 }

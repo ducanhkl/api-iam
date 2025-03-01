@@ -7,9 +7,11 @@ public enum ErrorGroup {
     PASSWORD,
     NAMESPACE,
     ROLE,
-    API_KEY,
+    KEYPAIR,
     CLIENT,
     AUTH,
     UNKNOWN,
-    TOKEN
+    TOKEN,
+    GROUP,
+    PERMISSION
 }

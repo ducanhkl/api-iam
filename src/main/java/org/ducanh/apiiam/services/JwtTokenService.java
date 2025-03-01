@@ -151,6 +151,7 @@ public class JwtTokenService {
                     .setCause(e);
         }
     }
+
     private Algorithm getVerifyAlgorithm(KeyPair keyPair) {
         if (keyPair.getAlgorithm() != KeyPair.Algorithm.RSA) {
             throw new CommonException(ErrorCode.UNKNOWN_ERROR, "Key algorithm is not RSA");

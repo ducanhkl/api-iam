@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -57,8 +58,8 @@ public class GlobalExceptionsHandle {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponseDto> handleValidationException(ConstraintViolationException ex, WebRequest request) {
+    @ExceptionHandler(value = {MethodArgumentNotValidException.class, ConstraintViolationException.class})
+    public ResponseEntity<ErrorResponseDto> handleValidationException(Exception ex, WebRequest request) {
         ErrorResponseDto errorResponse = ErrorResponseDto.builder()
                 .errorCode(ErrorCode.VALIDATION_ERROR.code())
                 .shortDescriptions(ErrorCode.VALIDATION_ERROR.shortDescriptions)
