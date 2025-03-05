@@ -1,7 +1,7 @@
 spring:
   threads:
     virtual:
-      enabled: true
+      enabled: false # will enable in future
   application:
     name: api-iam
   datasource:
@@ -23,9 +23,17 @@ logging:
   config: classpath:log4j2.xml
 
 app:
+  thread-pool:
+    common:
+      core-pool-size: 5
+      maxPoolSize: 10
+      queue-capacity: 100
+      keep-alive-seconds: 20
   auth:
     max-user-active-session: ${MAX_ACTIVE_SESSION:5}
   exceptions-handle:
     log-error-detail: ${APP_GLOBAL_EXCEPTIONS_LOG_ERROR_DETAIL:false}
+
+
 server:
   port: ${SERVER_PORT:8001}

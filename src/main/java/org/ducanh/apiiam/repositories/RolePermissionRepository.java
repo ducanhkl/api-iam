@@ -1,7 +1,9 @@
 package org.ducanh.apiiam.repositories;
 
 import feign.Param;
+import org.ducanh.apiiam.entities.GroupRoleIdOnly;
 import org.ducanh.apiiam.entities.RolePermission;
+import org.ducanh.apiiam.entities.RolePermissionIdOnly;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,4 +34,11 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
             @Param("permissionIds") List<String> permissionIds);
 
     List<RolePermission> findAllByNamespaceIdAndRoleId(String namespaceId, String roleId);
+
+    @Query("""
+        SELECT new org.ducanh.apiiam.entities.RolePermissionIdOnly(rp.roleId, rp.roleId, rp.namespaceId)
+            FROM RolePermission rp
+                WHERE rp.namespaceId = :namespaceId
+    """)
+    List<RolePermissionIdOnly> findAllByNamespaceId(String namespaceId);
 }

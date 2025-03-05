@@ -2,6 +2,7 @@ package org.ducanh.apiiam.repositories;
 
 
 import org.ducanh.apiiam.entities.GroupRole;
+import org.ducanh.apiiam.entities.GroupRoleIdOnly;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,4 +27,12 @@ public interface GroupRoleRepository extends JpaRepository<GroupRole, Long> {
         SELECT gr.roleId FROM GroupRole gr WHERE gr.groupId = :groupId AND gr.roleId IN (:roleIds) AND gr.namespaceId = :namespaceId
         """)
     List<String> findExistedRoleId(String groupId, String namespaceId, List<String> roleIds);
+
+    @Query("""
+        SELECT new org.ducanh.apiiam.entities.GroupRoleIdOnly(gr.groupId, gr.roleId, gr.namespaceId)
+            FROM GroupRole gr
+                WHERE gr.namespaceId = :namespaceId
+    """)
+    List<GroupRoleIdOnly> findAllByNamespaceId(String namespaceId);
+
 }

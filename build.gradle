@@ -35,11 +35,11 @@ configurations.configureEach {
     exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
 }
 
-dependencies {
-    // Spring managed dependence
+dependencies {    // Spring managed dependence
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Plugins
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.30'
@@ -51,13 +51,13 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '11.3.3'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: '3.4.3'
+    implementation group: 'io.micrometer', name: 'micrometer-tracing-bridge-brave', version: '1.5.0-M2'
 
     // Test library
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.5'
     testImplementation 'io.rest-assured:rest-assured'
-
 }
 
 dependencyManagement {
