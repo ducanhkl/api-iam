@@ -7,6 +7,7 @@ import org.ducanh.apiiam.dto.requests.AssignPermissionsToRoleRequestDto;
 import org.ducanh.apiiam.dto.requests.RemovePermissionsFromRoleRequestDto;
 import org.ducanh.apiiam.dto.responses.PermissionRoleResponseDto;
 import org.ducanh.apiiam.dto.responses.RolePermissionResponseDto;
+import org.ducanh.apiiam.services.NamespaceService;
 import org.ducanh.apiiam.services.RolePermissionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ import static org.ducanh.apiiam.Constants.*;
 @RequiredArgsConstructor
 public class RolePermissionController {
     private final RolePermissionService rolePermissionService;
+    private final NamespaceService namespaceService;
 
     @PostMapping("/role-id/{roleId}/permissions")
     public ResponseEntity<Void> assignPermissionsToRole(
@@ -33,6 +35,7 @@ public class RolePermissionController {
     ) {
         log.info("Assigning permissions {} to role {}", request.permissionIds(), roleId);
         rolePermissionService.assignPermissionsToRole(namespaceId, roleId, request.permissionIds());
+        namespaceService.increaseNamespaceVersion(namespaceId);
         return ResponseEntity.ok().build();
     }
 
@@ -44,6 +47,7 @@ public class RolePermissionController {
     ) {
         log.info("Removing permissions {} from role {}", request.permissionIds(), roleId);
         rolePermissionService.removePermissionsFromRole(namespaceId, roleId, request.permissionIds());
+        namespaceService.increaseNamespaceVersion(namespaceId);
         return ResponseEntity.ok().build();
     }
 

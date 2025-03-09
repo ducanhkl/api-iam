@@ -8,6 +8,7 @@ import org.ducanh.apiiam.dto.requests.UpdateRoleRequestDto;
 import org.ducanh.apiiam.dto.responses.CreateRoleResponseDto;
 import org.ducanh.apiiam.dto.responses.RoleResponseDto;
 import org.ducanh.apiiam.dto.responses.UpdateRoleResponseDto;
+import org.ducanh.apiiam.services.NamespaceService;
 import org.ducanh.apiiam.services.RoleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import static org.ducanh.apiiam.Constants.*;
 @RequiredArgsConstructor
 public class RoleController {
     private final RoleService roleService;
+    private final NamespaceService namespaceService;
 
     @PostMapping
     public ResponseEntity<CreateRoleResponseDto> createRole(
@@ -77,6 +79,7 @@ public class RoleController {
                                            @PathVariable String namespaceId) {
         log.info("Deleting role with id: {}", roleId);
         roleService.deleteRole(namespaceId, roleId);
+        namespaceService.increaseNamespaceVersion(namespaceId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -6,6 +6,7 @@ import org.ducanh.apiiam.dto.requests.CreateGroupRequestDto;
 import org.ducanh.apiiam.dto.requests.UpdateGroupRequestDto;
 import org.ducanh.apiiam.dto.responses.GroupResponseDto;
 import org.ducanh.apiiam.services.GroupService;
+import org.ducanh.apiiam.services.NamespaceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,7 @@ import static org.ducanh.apiiam.Constants.*;
 public class GroupController {
 
     private final GroupService groupService;
+    private final NamespaceService namespaceService;
 
     @PostMapping
     public ResponseEntity<GroupResponseDto> createGroup(
@@ -73,6 +75,7 @@ public class GroupController {
     public ResponseEntity<Void> deleteGroup(@PathVariable String namespaceId,
                                             @PathVariable String groupId) {
         groupService.deleteGroup(namespaceId, groupId);
+        namespaceService.increaseNamespaceVersion(namespaceId);
         return ResponseEntity.noContent().build();
     }
 }

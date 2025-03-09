@@ -7,6 +7,7 @@ import org.ducanh.apiiam.dto.requests.RemoveRolesFromGroupRequestDto;
 import org.ducanh.apiiam.dto.responses.GroupResponseDto;
 import org.ducanh.apiiam.dto.responses.GroupRoleResponseDto;
 import org.ducanh.apiiam.services.GroupRoleService;
+import org.ducanh.apiiam.services.NamespaceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -25,6 +26,7 @@ import static org.ducanh.apiiam.Constants.*;
 public class GroupRoleController {
 
     private final GroupRoleService groupRoleService;
+    private final NamespaceService namespaceService;
 
     @PostMapping("/group-id/{groupId}/roles")
     public ResponseEntity<Void> assignRolesToGroup(
@@ -34,6 +36,7 @@ public class GroupRoleController {
     ) {
         log.info("Assigning roles {} to group {}", request.roleIds(), groupId);
         groupRoleService.assignRolesToGroup(namespaceId, groupId, request.roleIds());
+        namespaceService.increaseNamespaceVersion(namespaceId);
         return ResponseEntity.ok().build();
     }
 
@@ -45,6 +48,7 @@ public class GroupRoleController {
     ) {
         log.info("Removing roles {} from group {}", request.roleIds(), groupId);
         groupRoleService.removeRolesFromGroup(namespaceId, groupId, request.roleIds());
+        namespaceService.increaseNamespaceVersion(namespaceId);
         return ResponseEntity.ok().build();
     }
 

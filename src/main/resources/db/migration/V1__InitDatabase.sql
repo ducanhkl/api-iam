@@ -56,6 +56,7 @@ CREATE TABLE namespace
     name         VARCHAR(100),
     description  VARCHAR(255),
     key_pair_id  BIGINT,
+    version      BIGINT DEFAULT 0,
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at   TIMESTAMP WITH TIME ZONE,
     CONSTRAINT pk_namespace PRIMARY KEY (namespace_id)

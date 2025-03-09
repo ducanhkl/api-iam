@@ -7,7 +7,9 @@ import org.ducanh.apiiam.dto.requests.CreatePermissionRequestDto;
 import org.ducanh.apiiam.dto.requests.IndexPermissionRequestParamsDto;
 import org.ducanh.apiiam.dto.requests.UpdatePermissionRequestDto;
 import org.ducanh.apiiam.dto.responses.PermissionResponseDto;
+import org.ducanh.apiiam.services.NamespaceService;
 import org.ducanh.apiiam.services.PermissionService;
+import org.ducanh.apiiam.services.RoleService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ import static org.ducanh.apiiam.Constants.*;
 public class PermissionController {
 
     private final PermissionService permissionService;
+    private final NamespaceService namespaceService;
 
     @PostMapping()
     public ResponseEntity<PermissionResponseDto> createPermission(
@@ -72,6 +75,7 @@ public class PermissionController {
     public ResponseEntity<Void> deletePermission(@PathVariable String permissionId,
                                                  @PathVariable String namespaceId) {
         permissionService.deletePermission(namespaceId, permissionId);
+        namespaceService.increaseNamespaceVersion(namespaceId);
         return ResponseEntity.noContent().build();
     }
 }

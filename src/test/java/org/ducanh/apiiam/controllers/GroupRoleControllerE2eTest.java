@@ -8,9 +8,11 @@ import io.restassured.http.ContentType;
 import org.ducanh.apiiam.ContainerConfig;
 import org.ducanh.apiiam.entities.Group;
 import org.ducanh.apiiam.entities.GroupRole;
+import org.ducanh.apiiam.entities.Namespace;
 import org.ducanh.apiiam.entities.Role;
 import org.ducanh.apiiam.repositories.GroupRepository;
 import org.ducanh.apiiam.repositories.GroupRoleRepository;
+import org.ducanh.apiiam.repositories.NamespaceRepository;
 import org.ducanh.apiiam.repositories.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,12 +40,15 @@ class GroupRoleControllerE2eTest {
     private GroupRepository groupRepository;
 
     @Autowired
+    private NamespaceRepository namespaceRepository;
+
+    @Autowired
     private RoleRepository roleRepository;
 
     @Autowired
     private GroupRoleRepository groupRoleRepository;
 
-    private static final String NAMESPACE_ID = "test-namespace";
+    private static final String NAMESPACE_ID = "master";
 
     @BeforeEach
     void setUp() {
@@ -141,6 +146,7 @@ class GroupRoleControllerE2eTest {
 
     @Test
     void whenRemoveRolesFromGroup_thenSuccess() {
+        resetAllNamespaces();
         // Given
         Group group = createTestGroup("test-group", "Test Group");
         Role role = createTestRole("test-role", "Test Role");
@@ -167,11 +173,14 @@ class GroupRoleControllerE2eTest {
 
         // Then
         List<GroupRole> remainingAssignments = groupRoleRepository.findAllByNamespaceIdAndGroupId(NAMESPACE_ID, group.getGroupId());
+        Namespace namespace = namespaceRepository.findByNamespaceId(NAMESPACE_ID);
         assertTrue(remainingAssignments.isEmpty());
+        assertEquals(1, namespace.getVersion());
     }
 
     @Test
     void whenRemoveRolesFromNonExistentGroup_thenFail() {
+        resetAllNamespaces();
         given()
                 .contentType(ContentType.JSON)
                 .body("""
@@ -185,6 +194,8 @@ class GroupRoleControllerE2eTest {
                 .statusCode(400)
                 .body("errorCode", equalTo("GROUP_009_400"))
                 .body("shortDescriptions", equalTo("Group not found"));
+        Namespace namespace = namespaceRepository.findByNamespaceId(NAMESPACE_ID);
+        assertEquals(0, namespace.getVersion());
     }
 
     @Test
@@ -319,5 +330,13 @@ class GroupRoleControllerE2eTest {
                 .body("$", hasSize(1))
                 .body("[0].groupId", equalTo(group1.getGroupId()))
                 .body("[0].groupName", equalTo(group1.getGroupName()));
+    }
+
+    private void resetAllNamespaces() {
+        var namespaces = namespaceRepository.findAll();
+        namespaces.forEach((namespace) -> {
+            namespace.setVersion(0L);
+            namespaceRepository.save(namespace);
+        });
     }
 }

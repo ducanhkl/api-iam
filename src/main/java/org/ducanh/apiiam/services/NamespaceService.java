@@ -35,6 +35,12 @@ public class NamespaceService {
         this.keyPairRepository = keyPairRepository;
     }
 
+    @Transactional
+    public void increaseNamespaceVersion(String namespaceId) {
+        int updatedRecord = namespaceRepository.increaseNamespaceVersion(namespaceId, 1L);
+        log.info("Namespace updated: {}", updatedRecord);
+    }
+
     public NamespaceResponseDto createNamespace(CreateNamespaceRequestDto request) {
         Optional<?> namespaceOpt = namespaceRepository.findById(request.namespaceId());
 

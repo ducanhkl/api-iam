@@ -7,9 +7,12 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import org.ducanh.apiiam.ContainerConfig;
 import org.ducanh.apiiam.entities.Group;
+import org.ducanh.apiiam.entities.Namespace;
 import org.ducanh.apiiam.repositories.GroupRepository;
 import org.ducanh.apiiam.repositories.GroupRoleRepository;
+import org.ducanh.apiiam.repositories.NamespaceRepository;
 import org.ducanh.apiiam.repositories.UserGroupRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,8 @@ public class GroupControllerE2eTest {
 
     @Autowired
     private GroupRepository groupRepository;
+    @Autowired
+    private NamespaceRepository namespaceRepository;
 
     @MockitoSpyBean
     private GroupRoleRepository groupRoleRepository;
@@ -39,7 +44,7 @@ public class GroupControllerE2eTest {
     @LocalServerPort
     private int port;
 
-    private static final String NAMESPACE_ID = "test-namespace";
+    private static final String NAMESPACE_ID = "master";
 
     @BeforeEach
     public void setup() {
@@ -160,6 +165,7 @@ public class GroupControllerE2eTest {
 
     @Test
     void whenDeleteGroup_thenSuccess() {
+        resetAllNamespaces();
         // Create a group first
         Group group = Group.builder()
                 .groupId("delete-group")
@@ -177,6 +183,16 @@ public class GroupControllerE2eTest {
                 .deleteAllByGroupIdAndNamespaceId(any(), any());
         verify(userGroupRepository, times(1))
                 .deleteAllByGroupIdAndNamespaceId(any(), any());
+        Namespace namespace = namespaceRepository.findByNamespaceId(NAMESPACE_ID);
+        Assertions.assertEquals(1, namespace.getVersion());
+    }
+
+    private void resetAllNamespaces() {
+        var namespaces = namespaceRepository.findAll();
+        namespaces.forEach((namespace) -> {
+            namespace.setVersion(0L);
+            namespaceRepository.save(namespace);
+        });
     }
 
     @Test

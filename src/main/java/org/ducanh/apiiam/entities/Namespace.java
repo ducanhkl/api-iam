@@ -39,6 +39,9 @@ public class Namespace {
     @Column(name = "key_pair_id")
     private Long keyPairId;
 
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @CreationTimestamp
     private OffsetDateTime createdAt;

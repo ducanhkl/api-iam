@@ -3,9 +3,9 @@ package org.ducanh.apiiam.repositories;
 import org.ducanh.apiiam.entities.Namespace;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import javax.naming.Name;
 
 @Repository
 public interface NamespaceRepository extends JpaRepository<Namespace, String>, JpaSpecificationExecutor<Namespace> {
@@ -18,5 +18,12 @@ public interface NamespaceRepository extends JpaRepository<Namespace, String>, J
         }
     }
 
+    @Modifying
+    @Query("""
+        UPDATE Namespace n
+                SET n.version = n.version+ :increment
+                        WHERE n.namespaceId = :namespaceId
+        """)
+    int increaseNamespaceVersion(String namespaceId, Long increment);
 
 }
