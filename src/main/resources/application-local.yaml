@@ -11,7 +11,14 @@ spring:
     show-sql: true
   flyway:
     enabled: true
-
+  data:
+    redis:
+      database: 0
+      host: localhost
+      port: 6379
+      password:
+      timeout: 6000
+      username:
 springdoc:
   api-docs:
     path: /open-api.json

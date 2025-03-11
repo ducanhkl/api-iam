@@ -18,6 +18,15 @@ spring:
       connection-test-query: SELECT 1
       validation-timeout: 3000
       pool-name: "DefaultHikariPool"
+  data:
+    redis:
+      database: ${REDIS_DATABASE:0}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      timeout: ${REDIS_TIMEOUT}
+      username: ${REDIS_USERNAME}
+
 
 logging:
   config: classpath:log4j2.xml

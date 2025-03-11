@@ -41,6 +41,7 @@ dependencies {    // Spring managed dependence
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // Plugins
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.30'
