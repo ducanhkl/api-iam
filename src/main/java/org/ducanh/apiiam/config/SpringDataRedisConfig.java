@@ -14,7 +14,7 @@ public class SpringDataRedisConfig {
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
         var template = new RedisTemplate<String, Object>();
         template.setConnectionFactory(connectionFactory);
-        template.setValueSerializer(RedisSerializer.string());
+        template.setValueSerializer(RedisSerializer.json());
         return template;
     }
 

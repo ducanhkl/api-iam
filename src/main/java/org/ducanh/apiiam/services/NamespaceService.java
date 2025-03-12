@@ -2,6 +2,7 @@ package org.ducanh.apiiam.services;
 
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
+import org.ducanh.apiiam.dto.events.NamespaceChangeEvent;
 import org.ducanh.apiiam.dto.requests.CreateNamespaceRequestDto;
 import org.ducanh.apiiam.dto.requests.IndexNamespaceRequestParamsDto;
 import org.ducanh.apiiam.dto.requests.UpdateNamespaceRequestDto;
@@ -10,9 +11,12 @@ import org.ducanh.apiiam.entities.Namespace;
 import org.ducanh.apiiam.exceptions.CommonException;
 import org.ducanh.apiiam.repositories.KeyPairRepository;
 import org.ducanh.apiiam.repositories.NamespaceRepository;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -21,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.ducanh.apiiam.Constants.NAMESPACE_CHANGE_TOPIC;
 import static org.ducanh.apiiam.exceptions.ErrorCode.*;
 
 
@@ -29,16 +34,26 @@ import static org.ducanh.apiiam.exceptions.ErrorCode.*;
 public class NamespaceService {
     private final NamespaceRepository namespaceRepository;
     private final KeyPairRepository keyPairRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    public NamespaceService(NamespaceRepository namespaceRepository, KeyPairRepository keyPairRepository) {
+    public NamespaceService(NamespaceRepository namespaceRepository,
+                            KeyPairRepository keyPairRepository,
+                            RedisTemplate<String, Object> redisTemplate) {
         this.namespaceRepository = namespaceRepository;
         this.keyPairRepository = keyPairRepository;
+        this.redisTemplate = redisTemplate;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void eventListener() {
+        redisTemplate.convertAndSend("namespace-change", new NamespaceChangeEvent("master"));
     }
 
     @Transactional
     public void increaseNamespaceVersion(String namespaceId) {
         int updatedRecord = namespaceRepository.increaseNamespaceVersion(namespaceId, 1L);
         log.info("Namespace updated: {}", updatedRecord);
+        redisTemplate.convertAndSend(NAMESPACE_CHANGE_TOPIC, new NamespaceChangeEvent(namespaceId));
     }
 
     public NamespaceResponseDto createNamespace(CreateNamespaceRequestDto request) {

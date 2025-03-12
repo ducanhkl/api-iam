@@ -1,5 +1,10 @@
 package org.ducanh.apiiam.listeners.redis;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.ducanh.apiiam.dto.events.NamespaceChangeEvent;
+import org.ducanh.apiiam.repositories.NamespaceRepository;
+import org.ducanh.apiiam.storage.PolicyStorageManagement;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -14,32 +19,34 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.ducanh.apiiam.Constants.NAMESPACE_CHANGE_TOPIC;
+
 @Component
+@Slf4j
 public class NamespaceVersionChangeListener implements MessageListener {
 
-
-
-//    @EventListener(ApplicationReadyEvent.class)
-//    public void onApplicationStart() {
-//        var executor = Executors.newScheduledThreadPool(1);
-//        executor.scheduleAtFixedRate(() -> {
-//            var result = redisTemplate.convertAndSend("namespace-change", "test");
-//            System.out.println("Send with value " + result);
-//        }, 1, 3L, TimeUnit.SECONDS);
-//    }
-
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
+    private final PolicyStorageManagement policyStorageManagement;
 
     public NamespaceVersionChangeListener(RedisMessageListenerContainer redisConnectionFactory,
-                         RedisTemplate<String, Object> redisTemplate) {
-        ChannelTopic channelTopic = new ChannelTopic("namespace-change");
+                                          ObjectMapper objectMapper,
+                                          PolicyStorageManagement policyStorageManagement) {
+        ChannelTopic channelTopic = new ChannelTopic(NAMESPACE_CHANGE_TOPIC);
         redisConnectionFactory.addMessageListener(this, channelTopic);
-        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
+        this.policyStorageManagement = policyStorageManagement;
     }
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
-        System.out.println("Received Message: " + message);
-        System.out.println("Received Message: " + new String(message.getBody()));
+        var rawBody = new String(message.getBody());
+        log.info("Received namespace version change rawMessage: {}", rawBody);
+        try {
+            NamespaceChangeEvent event = objectMapper.readValue(rawBody, NamespaceChangeEvent.class);
+            log.info("Received namespace version change event: {}", event);
+            policyStorageManagement.reloadPolicy(event.namespaceId());
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

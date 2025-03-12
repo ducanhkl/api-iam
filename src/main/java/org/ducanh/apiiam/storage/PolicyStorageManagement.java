@@ -1,16 +1,22 @@
 package org.ducanh.apiiam.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.ducanh.apiiam.Constants;
 import org.ducanh.apiiam.entities.GroupRoleIdOnly;
 import org.ducanh.apiiam.entities.Namespace;
 import org.ducanh.apiiam.entities.RolePermissionIdOnly;
 import org.ducanh.apiiam.repositories.GroupRoleRepository;
 import org.ducanh.apiiam.repositories.NamespaceRepository;
 import org.ducanh.apiiam.repositories.RolePermissionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class PolicyStorageManagement {
@@ -19,36 +25,48 @@ public class PolicyStorageManagement {
     private final GroupRoleRepository groupRoleRepository;
     private final RolePermissionRepository rolePermissionRepository;
     private final NamespaceRepository namespaceRepository;
+    private final ThreadPoolTaskExecutor commonThreadPool;
 
     public PolicyStorageManagement(
             GroupRoleRepository groupRoleRepository,
             RolePermissionRepository rolePermissionRepository,
-            NamespaceRepository namespaceRepository
+            NamespaceRepository namespaceRepository,
+            ThreadPoolTaskExecutor threadPoolTaskExecutor
     ) {
         this.groupRoleRepository = groupRoleRepository;
         this.rolePermissionRepository = rolePermissionRepository;
         this.namespaceRepository = namespaceRepository;
+        this.commonThreadPool = threadPoolTaskExecutor;
         initiatingPolicy();
     }
 
     private void initiatingPolicy() {
         List<Namespace> namespaces = namespaceRepository.findAll();
-        namespaces.forEach(namespace -> {
-            String namespaceId = namespace.getNamespaceId();
-            log.info("Initiating for namespaceId: {}", namespaceId);
-            initiatingPolicy(namespaceId);
-        });
-        log.info("Initiating policy for all namespaces, number of namespaces: {}", namespaces.size());
+        List<CompletableFuture<Void>> futures = namespaces.stream()
+                .map((namespace) -> CompletableFuture.runAsync(() -> initiatingPolicy(namespace), commonThreadPool))
+                .toList();
+        try {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        log.info("Finish init policy for all namespaces, number of namespaces: {}", namespaces.size());
     }
 
-    private synchronized void initiatingPolicy(String namespaceId) {
-        List<GroupRoleIdOnly> groupRoleIdList = groupRoleRepository.findAllByNamespaceId(namespaceId);
-        List<RolePermissionIdOnly> rolePermissionIdOnlyList = rolePermissionRepository.findAllByNamespaceId(namespaceId);
-        policies.put(namespaceId, new PolicyStorage(namespaceId, groupRoleIdList, rolePermissionIdOnlyList));
+    private void initiatingPolicy(Namespace namespace) {
+        String namespaceIdIntern = namespace.getNamespaceId().intern();
+        log.info("Initiating policy for namespace: {}", namespaceIdIntern);
+        synchronized (namespaceIdIntern) {
+            List<GroupRoleIdOnly> groupRoleIdList = groupRoleRepository.findAllByNamespaceId(namespaceIdIntern);
+            List<RolePermissionIdOnly> rolePermissionIdOnlyList = rolePermissionRepository.findAllByNamespaceId(namespaceIdIntern);
+            policies.put(namespaceIdIntern, new PolicyStorage(namespace, groupRoleIdList, rolePermissionIdOnlyList));
+            log.info("Succeed rebuilding policy for namespace: {}", namespace);
+        }
     }
 
     public void reloadPolicy(String namespaceId) {
-        initiatingPolicy(namespaceId);
+        Namespace namespace = namespaceRepository.findByNamespaceId(namespaceId);
+        initiatingPolicy(namespace);
     }
 
     public PolicyStorage getPolicyStorage(String namespaceId) {
