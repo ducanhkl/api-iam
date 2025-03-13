@@ -3,21 +3,12 @@ package org.ducanh.apiiam.listeners.redis;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.events.NamespaceChangeEvent;
-import org.ducanh.apiiam.repositories.NamespaceRepository;
 import org.ducanh.apiiam.storage.PolicyStorageManagement;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.ducanh.apiiam.Constants.NAMESPACE_CHANGE_TOPIC;
 

@@ -17,6 +17,11 @@ springdoc:
   packages-to-scan: org.ducanh.apiiam.controllers
   show-actuator: false
 
+logging:
+  level:
+    org.springframework.data.redis: debug
+    io.lettuce.core: debug
+
 app:
   exceptions-handle:
     log-error-detail: true

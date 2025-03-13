@@ -1,22 +1,18 @@
 package org.ducanh.apiiam.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ducanh.apiiam.Constants;
 import org.ducanh.apiiam.entities.GroupRoleIdOnly;
 import org.ducanh.apiiam.entities.Namespace;
 import org.ducanh.apiiam.entities.RolePermissionIdOnly;
 import org.ducanh.apiiam.repositories.GroupRoleRepository;
 import org.ducanh.apiiam.repositories.NamespaceRepository;
 import org.ducanh.apiiam.repositories.RolePermissionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class PolicyStorageManagement {

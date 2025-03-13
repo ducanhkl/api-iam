@@ -24,7 +24,7 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD}
-      timeout: ${REDIS_TIMEOUT}
+      timeout: ${REDIS_TIMEOUT:60000}
       username: ${REDIS_USERNAME}
 
 
