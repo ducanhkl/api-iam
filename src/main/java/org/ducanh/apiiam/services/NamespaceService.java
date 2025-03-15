@@ -44,11 +44,6 @@ public class NamespaceService {
         this.redisTemplate = redisTemplate;
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void eventListener() {
-        redisTemplate.convertAndSend("namespace-change", new NamespaceChangeEvent("master"));
-    }
-
     @Transactional
     public void increaseNamespaceVersion(String namespaceId) {
         int updatedRecord = namespaceRepository.increaseNamespaceVersion(namespaceId, 1L);

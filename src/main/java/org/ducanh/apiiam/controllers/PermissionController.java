@@ -1,5 +1,7 @@
 package org.ducanh.apiiam.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +23,9 @@ import java.util.List;
 
 import static org.ducanh.apiiam.Constants.*;
 
-
 @RestController
 @RequestMapping("/permission/namespace-id/{namespaceId}")
+@Tag(name = "Permission Controller", description = "Operations for managing permissions within a namespace")
 @RequiredArgsConstructor
 @Slf4j
 public class PermissionController {
@@ -32,6 +34,8 @@ public class PermissionController {
     private final NamespaceService namespaceService;
 
     @PostMapping()
+    @Operation(summary = "Create permission",
+            description = "Creates a new permission within the specified namespace")
     public ResponseEntity<PermissionResponseDto> createPermission(
             @Valid @RequestBody CreatePermissionRequestDto request,
             @PathVariable String namespaceId) {
@@ -41,13 +45,18 @@ public class PermissionController {
     }
 
     @GetMapping("/permission-id/{permissionId}")
-    public ResponseEntity<PermissionResponseDto> getPermission(@PathVariable String permissionId,
-                                                               @PathVariable String namespaceId) {
+    @Operation(summary = "Get permission details",
+            description = "Retrieves details of a specific permission by its ID within the namespace")
+    public ResponseEntity<PermissionResponseDto> getPermission(
+            @PathVariable String permissionId,
+            @PathVariable String namespaceId) {
         PermissionResponseDto response = permissionService.getPermission(namespaceId, permissionId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/index")
+    @Operation(summary = "List permissions",
+            description = "Retrieves a paginated list of permissions within the namespace with optional filtering")
     public ResponseEntity<List<PermissionResponseDto>> indexPermissions(
             @PathVariable String namespaceId,
             IndexPermissionRequestParamsDto params) {
@@ -63,6 +72,8 @@ public class PermissionController {
     }
 
     @PutMapping("/permission-id/{permissionId}")
+    @Operation(summary = "Update permission",
+            description = "Updates an existing permission within the specified namespace")
     public ResponseEntity<PermissionResponseDto> updatePermission(
             @PathVariable String permissionId,
             @PathVariable String namespaceId,
@@ -72,8 +83,11 @@ public class PermissionController {
     }
 
     @DeleteMapping("/permission-id/{permissionId}")
-    public ResponseEntity<Void> deletePermission(@PathVariable String permissionId,
-                                                 @PathVariable String namespaceId) {
+    @Operation(summary = "Delete permission",
+            description = "Deletes a permission and increases the namespace version")
+    public ResponseEntity<Void> deletePermission(
+            @PathVariable String permissionId,
+            @PathVariable String namespaceId) {
         permissionService.deletePermission(namespaceId, permissionId);
         namespaceService.increaseNamespaceVersion(namespaceId);
         return ResponseEntity.noContent().build();

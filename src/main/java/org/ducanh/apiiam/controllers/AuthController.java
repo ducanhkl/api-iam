@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("auth")
-@Tag(name = "Auth controller")
+@Tag(name = "Auth controller", description = "Operations related to user authentication")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("register")
-    @Operation(summary = "Register user account")
+    @Operation(summary = "Register user account", description = "Registers a new user account with the provided details.")
     public ResponseEntity<UserRegisterResponseDto> register(
             @RequestBody @Valid UserRegisterRequestDto userRegisterRequestDto,
             @RequestHeader(value = "namespace-id") String namespaceId) {
@@ -31,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    @Operation(summary = "User login and get the token")
+    @Operation(summary = "User login and get the token", description = "Authenticates a user and returns a token for session management.")
     public ResponseEntity<UserLoginResponseDto> login(
             @RequestBody @Valid UserLoginRequestDto userLoginRequestDto,
             @RequestHeader("ip-address") String ipAddress,
@@ -40,16 +40,15 @@ public class AuthController {
     }
 
     @PutMapping("verify/{username}")
-    @Operation(summary = "Sent  the otp for user to active user")
+    @Operation(summary = "Send the OTP for user to activate account", description = "Sends an OTP to the user for account verification.")
     public ResponseEntity<?> verify(@PathVariable("username") String username,
                                     @RequestHeader("namespace-id") String namespaceId) {
         authService.verify(username, namespaceId);
         return ResponseEntity.ok().build();
     }
 
-
     @PutMapping("/token/refresh")
-    @Operation(summary = "Renew access token to generate new session and disable old session")
+    @Operation(summary = "Renew access token", description = "Generates a new session and disables the old session using the refresh token.")
     public ResponseEntity<TokenRefreshResponse> renewAccessToken(
             @RequestHeader("refresh-token") String refreshToken,
             @RequestHeader("user-agent") String userAgent,
@@ -59,13 +58,13 @@ public class AuthController {
     }
 
     @DeleteMapping("/logout")
-    @Operation(summary = "Logout from user session")
+    @Operation(summary = "Logout from user session", description = "Logs out the user by invalidating the current session.")
     public void logout(@RequestHeader("refresh-token") String refreshToken) {
         authService.logout(refreshToken);
     }
 
     @PutMapping("complete-verify/{username}")
-    @Operation(summary = "Input otp token to very account")
+    @Operation(summary = "Complete account verification", description = "Completes the account verification process using the OTP code.")
     public ResponseEntity<?> completeVerify(
             @PathVariable("username") String username,
             @RequestHeader("namespace-id") String namespaceId,

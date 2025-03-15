@@ -1,5 +1,7 @@
 package org.ducanh.apiiam.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.requests.AssignRolesToGroupRequestDto;
@@ -21,6 +23,7 @@ import static org.ducanh.apiiam.Constants.*;
 
 @RestController
 @RequestMapping("/group-role/{namespaceId}")
+@Tag(name = "Group Role Controller", description = "Operations for managing relationships between groups and roles")
 @Slf4j
 @RequiredArgsConstructor
 public class GroupRoleController {
@@ -29,6 +32,8 @@ public class GroupRoleController {
     private final NamespaceService namespaceService;
 
     @PostMapping("/group-id/{groupId}/roles")
+    @Operation(summary = "Assign roles to group",
+            description = "Assigns multiple roles to a specific group within a namespace")
     public ResponseEntity<Void> assignRolesToGroup(
             @PathVariable String groupId,
             @PathVariable String namespaceId,
@@ -41,6 +46,8 @@ public class GroupRoleController {
     }
 
     @DeleteMapping("/group-id/{groupId}/roles")
+    @Operation(summary = "Remove roles from group",
+            description = "Removes specified roles from a group within a namespace")
     public ResponseEntity<Void> removeRolesFromGroup(
             @PathVariable String groupId,
             @PathVariable String namespaceId,
@@ -53,6 +60,8 @@ public class GroupRoleController {
     }
 
     @GetMapping("/group-id/{groupId}/roles")
+    @Operation(summary = "Get group roles",
+            description = "Retrieves all roles assigned to a specific group with optional filtering and pagination")
     public ResponseEntity<List<GroupRoleResponseDto>> getGroupRoles(
             @PathVariable String groupId,
             @PathVariable String namespaceId,
@@ -69,6 +78,8 @@ public class GroupRoleController {
     }
 
     @GetMapping("/role-id/{roleId}/groups")
+    @Operation(summary = "Get role groups",
+            description = "Retrieves all groups associated with a specific role with optional filtering and pagination")
     public ResponseEntity<List<GroupResponseDto>> getRoleGroups(
             @PathVariable String roleId,
             @PathVariable String namespaceId,

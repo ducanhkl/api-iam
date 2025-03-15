@@ -1,5 +1,7 @@
 package org.ducanh.apiiam.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,8 @@ import static org.ducanh.apiiam.Constants.*;
 
 @RestController
 @RequestMapping("/role-permission/{namespaceId}")
+@Tag(name = "Role Permission Controller",
+        description = "Operations for managing relationships between roles and permissions")
 @Slf4j
 @RequiredArgsConstructor
 public class RolePermissionController {
@@ -28,6 +32,8 @@ public class RolePermissionController {
     private final NamespaceService namespaceService;
 
     @PostMapping("/role-id/{roleId}/permissions")
+    @Operation(summary = "Assign permissions to role",
+            description = "Assigns multiple permissions to a specific role within a namespace")
     public ResponseEntity<Void> assignPermissionsToRole(
             @PathVariable String roleId,
             @PathVariable String namespaceId,
@@ -40,6 +46,8 @@ public class RolePermissionController {
     }
 
     @DeleteMapping("/role-id/{roleId}/permissions")
+    @Operation(summary = "Remove permissions from role",
+            description = "Removes specified permissions from a role within a namespace")
     public ResponseEntity<Void> removePermissionsFromRole(
             @PathVariable String roleId,
             @PathVariable String namespaceId,
@@ -52,6 +60,8 @@ public class RolePermissionController {
     }
 
     @GetMapping("/role-id/{roleId}/permissions")
+    @Operation(summary = "Get role permissions",
+            description = "Retrieves all permissions assigned to a specific role with optional filtering")
     public ResponseEntity<List<RolePermissionResponseDto>> getRolePermissions(
             @PathVariable String roleId,
             @PathVariable String namespaceId,
@@ -68,6 +78,8 @@ public class RolePermissionController {
     }
 
     @GetMapping("/permission-id/{permissionId}/roles")
+    @Operation(summary = "Get permission roles",
+            description = "Retrieves all roles associated with a specific permission with optional filtering")
     public ResponseEntity<List<PermissionRoleResponseDto>> getPermissionRoles(
             @PathVariable String permissionId,
             @PathVariable String namespaceId,

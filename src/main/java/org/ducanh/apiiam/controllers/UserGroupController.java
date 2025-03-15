@@ -1,6 +1,7 @@
 package org.ducanh.apiiam.controllers;
 
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,8 @@ import static org.ducanh.apiiam.Constants.TOTAL_PAGES_HEADER;
 
 @RestController
 @RequestMapping("/user-group/")
+@Tag(name = "User Group Controller",
+        description = "Operations for managing relationships between users and groups")
 @Slf4j
 @RequiredArgsConstructor
 public class UserGroupController {
@@ -30,6 +33,8 @@ public class UserGroupController {
     private final UserGroupService userGroupService;
 
     @PostMapping("user-id/{userId}/groups")
+    @Operation(summary = "Assign groups to user",
+            description = "Assigns multiple groups to a specific user")
     public ResponseEntity<Void> assignGroupsToUser(
             @PathVariable Long userId,
             @Valid @RequestBody AssignGroupsForUserRequestDto request) {
@@ -39,6 +44,8 @@ public class UserGroupController {
     }
 
     @GetMapping("user-id/{userId}/groups")
+    @Operation(summary = "Get user groups",
+            description = "Retrieves all groups associated with a user, with optional filtering and pagination")
     public ResponseEntity<List<UserGroupResponseDto>> getUserGroups(
             @PathVariable Long userId,
             @RequestParam(required = false) String groupName,
@@ -55,6 +62,8 @@ public class UserGroupController {
     }
 
     @PostMapping("user-id/{userId}/groups/verify")
+    @Operation(summary = "Verify user groups",
+            description = "Verifies if a user belongs to specified groups")
     public ResponseEntity<List<VerifyUserGroupResponseDto>> verifyUserGroups(
             @PathVariable Long userId,
             @Valid @RequestBody VerifyGroupsRequestDto request) {
@@ -63,10 +72,12 @@ public class UserGroupController {
     }
 
     @DeleteMapping("user-id/{userId}/groups/")
+    @Operation(summary = "Remove user from groups",
+            description = "Removes a user from specified groups")
     public ResponseEntity<Void> deleteUserGroups(
             @PathVariable Long userId,
             @Valid @RequestBody RemoveUserFromGroupsRequestDto request
-            ) {
+    ) {
         userGroupService.removeUserFromGroups(userId, request.groupIds());
         return ResponseEntity.ok().build();
     }

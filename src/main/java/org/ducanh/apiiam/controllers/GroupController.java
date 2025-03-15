@@ -1,5 +1,7 @@
 package org.ducanh.apiiam.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ducanh.apiiam.dto.requests.CreateGroupRequestDto;
@@ -18,9 +20,9 @@ import java.util.List;
 
 import static org.ducanh.apiiam.Constants.*;
 
-
 @RestController
 @RequestMapping("/group/namespace-id/{namespaceId}")
+@Tag(name = "Group Controller", description = "Operations related to group management within a namespace")
 @RequiredArgsConstructor
 @Slf4j
 public class GroupController {
@@ -29,6 +31,7 @@ public class GroupController {
     private final NamespaceService namespaceService;
 
     @PostMapping
+    @Operation(summary = "Create a new group", description = "Creates a new group within the specified namespace.")
     public ResponseEntity<GroupResponseDto> createGroup(
             @RequestBody CreateGroupRequestDto request,
             @PathVariable String namespaceId) {
@@ -38,6 +41,7 @@ public class GroupController {
     }
 
     @GetMapping("group-id/{id}")
+    @Operation(summary = "Get group details", description = "Retrieves details of a specific group by its ID within the specified namespace.")
     public ResponseEntity<GroupResponseDto> getGroup(@PathVariable String id,
                                                      @PathVariable String namespaceId) {
         GroupResponseDto response = groupService.getGroup(namespaceId, id);
@@ -45,6 +49,7 @@ public class GroupController {
     }
 
     @GetMapping("/index")
+    @Operation(summary = "List groups", description = "Lists all groups within the specified namespace, with optional pagination and filtering by group name.")
     public ResponseEntity<List<GroupResponseDto>> indexGroups(
             @RequestParam(required = false) String groupName,
             @RequestParam(defaultValue = "0") int page,
@@ -63,6 +68,7 @@ public class GroupController {
     }
 
     @PutMapping("group-id/{id}")
+    @Operation(summary = "Update group details", description = "Updates the details of a specific group by its ID within the specified namespace.")
     public ResponseEntity<GroupResponseDto> updateGroup(
             @PathVariable String id,
             @PathVariable String namespaceId,
@@ -72,6 +78,7 @@ public class GroupController {
     }
 
     @DeleteMapping("group-id/{groupId}")
+    @Operation(summary = "Delete a group", description = "Deletes a specific group by its ID within the specified namespace and increases the namespace version.")
     public ResponseEntity<Void> deleteGroup(@PathVariable String namespaceId,
                                             @PathVariable String groupId) {
         groupService.deleteGroup(namespaceId, groupId);

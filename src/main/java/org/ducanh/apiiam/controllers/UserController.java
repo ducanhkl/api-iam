@@ -1,5 +1,7 @@
 package org.ducanh.apiiam.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +25,15 @@ import static org.ducanh.apiiam.Constants.*;
 
 @RestController
 @RequestMapping("user")
+@Tag(name = "User Controller", description = "Operations for managing user accounts")
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
     private final UserService userService;
 
     @PostMapping
+    @Operation(summary = "Create new user",
+            description = "Creates a new user account with the provided details")
     public ResponseEntity<UserResponseDto> createUser(
             @Valid @RequestBody CreateUserRequestDto requestDto) {
         log.info("Creating user: {}", requestDto);
@@ -37,6 +42,8 @@ public class UserController {
     }
 
     @GetMapping("index")
+    @Operation(summary = "List users",
+            description = "Retrieves a paginated list of users with optional filtering")
     public ResponseEntity<List<UserResponseDto>> getUsers(
             IndexUserRequestParamsDto params
     ) {
@@ -52,11 +59,15 @@ public class UserController {
     }
 
     @GetMapping("/user-id/{userId}")
+    @Operation(summary = "Get user details",
+            description = "Retrieves details of a specific user by their ID")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.getUser(userId));
     }
 
     @PutMapping("/user-id/{userId}")
+    @Operation(summary = "Update user details",
+            description = "Updates the details of an existing user")
     public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable Long userId,
             @Valid @RequestBody UpdateUserRequestDto requestDto) {
@@ -64,12 +75,16 @@ public class UserController {
     }
 
     @DeleteMapping("/user-id/{userId}")
+    @Operation(summary = "Delete user",
+            description = "Deletes a user account by their ID")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/user-id/{userId}/password")
+    @Operation(summary = "Update user password",
+            description = "Updates a user's password and returns new login credentials")
     public ResponseEntity<UserLoginResponseDto> updatePassword(
             @PathVariable Long userId,
             @Valid @RequestBody UpdatePasswordRequestDto requestDto,

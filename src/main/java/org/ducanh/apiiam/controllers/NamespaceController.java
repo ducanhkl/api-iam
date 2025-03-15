@@ -21,18 +21,18 @@ import java.util.List;
 
 import static org.ducanh.apiiam.Constants.*;
 
-
 @RestController
 @RequestMapping("/namespace")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Namespace controller")
+@Tag(name = "Namespace Controller", description = "Operations for managing namespaces")
 public class NamespaceController {
 
     private final NamespaceService namespaceService;
 
     @PostMapping
-    @Operation(summary = "Create namespace")
+    @Operation(summary = "Create a new namespace",
+            description = "Creates a new namespace with the provided details")
     public ResponseEntity<NamespaceResponseDto> createNamespace(
             @Valid @RequestBody CreateNamespaceRequestDto request) {
         log.info("Creating namespace: {}", request);
@@ -41,12 +41,16 @@ public class NamespaceController {
     }
 
     @GetMapping("/{namespaceId}")
+    @Operation(summary = "Get namespace details",
+            description = "Retrieves details of a specific namespace by its ID")
     public ResponseEntity<NamespaceResponseDto> getNamespace(@PathVariable String namespaceId) {
         NamespaceResponseDto response = namespaceService.getNamespace(namespaceId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/index")
+    @Operation(summary = "List namespaces",
+            description = "Retrieves a paginated list of namespaces with optional filtering")
     public ResponseEntity<List<NamespaceResponseDto>> indexNamespaces(
             IndexNamespaceRequestParamsDto params) {
         Pageable pageable = PageRequest.of(params.page(), params.size());
@@ -61,6 +65,8 @@ public class NamespaceController {
     }
 
     @PutMapping("/{namespaceId}")
+    @Operation(summary = "Update namespace",
+            description = "Updates an existing namespace with the provided details")
     public ResponseEntity<NamespaceResponseDto> updateNamespace(
             @PathVariable String namespaceId,
             @Valid @RequestBody UpdateNamespaceRequestDto request) {
