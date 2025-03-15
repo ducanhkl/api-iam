@@ -36,7 +36,7 @@ public interface RolePermissionRepository extends JpaRepository<RolePermission, 
     List<RolePermission> findAllByNamespaceIdAndRoleId(String namespaceId, String roleId);
 
     @Query("""
-        SELECT new org.ducanh.apiiam.entities.RolePermissionIdOnly(rp.roleId, rp.roleId, rp.namespaceId)
+        SELECT new org.ducanh.apiiam.entities.RolePermissionIdOnly(rp.roleId, rp.permissionId, rp.namespaceId)
             FROM RolePermission rp
                 WHERE rp.namespaceId = :namespaceId
     """)

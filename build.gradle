@@ -61,6 +61,7 @@ dependencies {    // Spring managed dependence
     testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.20.5'
     testImplementation group: 'com.redis.testcontainers', name: 'testcontainers-redis', version: '1.6.4'
     testImplementation 'io.rest-assured:rest-assured'
+    testImplementation group: 'org.awaitility', name: 'awaitility', version: '4.3.0'
 }
 
 dependencyManagement {

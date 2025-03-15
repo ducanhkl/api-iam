@@ -35,7 +35,7 @@ class PermissionControllerE2eTest {
     private PermissionRepository permissionRepository;
 
     private static final String NAMESPACE_ID = "test-namespace";
-    private static final String BASE_PATH = "/permission/namespace-id/{namespaceId}/";
+    private static final String BASE_PATH = "/permission/namespace-id/{namespaceId}";
 
     @MockitoSpyBean
     private RolePermissionRepository rolePermissionRepository;
@@ -111,7 +111,7 @@ class PermissionControllerE2eTest {
 
         given()
                 .when()
-                .get(BASE_PATH + "permission-id/{permissionId}", NAMESPACE_ID, permission.getPermissionId())
+                .get(BASE_PATH + "/permission-id/{permissionId}", NAMESPACE_ID, permission.getPermissionId())
                 .then()
                 .statusCode(200)
                 .body("permissionId", equalTo(permission.getPermissionId()))
@@ -123,7 +123,7 @@ class PermissionControllerE2eTest {
     void whenGetNonExistentPermission_thenFail() {
         given()
                 .when()
-                .get(BASE_PATH + "permission-id/{permissionId}", NAMESPACE_ID, "non-existent")
+                .get(BASE_PATH + "/permission-id/{permissionId}", NAMESPACE_ID, "non-existent")
                 .then()
                 .statusCode(400)
                 .body("errorCode", equalTo("PERMISSION_014_400"))
@@ -145,7 +145,7 @@ class PermissionControllerE2eTest {
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
-                .put(BASE_PATH + "permission-id/{permissionId}", NAMESPACE_ID, permission.getPermissionId())
+                .put(BASE_PATH + "/permission-id/{permissionId}", NAMESPACE_ID, permission.getPermissionId())
                 .then()
                 .statusCode(200)
                 .body("permissionName", equalTo("Updated Name"))
@@ -169,7 +169,7 @@ class PermissionControllerE2eTest {
                 .contentType(ContentType.JSON)
                 .body(requestBody)
                 .when()
-                .put(BASE_PATH + "permission-id/{permissionId}", NAMESPACE_ID, "non-existent")
+                .put(BASE_PATH + "/permission-id/{permissionId}", NAMESPACE_ID, "non-existent")
                 .then()
                 .statusCode(400)
                 .body("errorCode", equalTo("PERMISSION_014_400"))
@@ -182,7 +182,7 @@ class PermissionControllerE2eTest {
 
         given()
                 .when()
-                .delete(BASE_PATH + "permission-id/{permissionId}", NAMESPACE_ID, permission.getPermissionId())
+                .delete(BASE_PATH + "/permission-id/{permissionId}", NAMESPACE_ID, permission.getPermissionId())
                 .then()
                 .statusCode(204);
         verify(rolePermissionRepository, times(1))
@@ -194,7 +194,7 @@ class PermissionControllerE2eTest {
     void whenDeleteNonExistentPermission_thenFail() {
         given()
                 .when()
-                .delete(BASE_PATH + "permission-id/{permissionId}", NAMESPACE_ID, "non-existent")
+                .delete(BASE_PATH + "/permission-id/{permissionId}", NAMESPACE_ID, "non-existent")
                 .then()
                 .statusCode(400)
                 .body("errorCode", equalTo("PERMISSION_014_400"))
@@ -209,7 +209,7 @@ class PermissionControllerE2eTest {
                 .queryParam("page", 0)
                 .queryParam("size", 10)
                 .when()
-                .get(BASE_PATH + "index", NAMESPACE_ID)
+                .get(BASE_PATH + "/index", NAMESPACE_ID)
                 .then()
                 .statusCode(200)
                 .body("size()", equalTo(2))
@@ -226,7 +226,7 @@ class PermissionControllerE2eTest {
                 .queryParam("page", 0)
                 .queryParam("size", 10)
                 .when()
-                .get(BASE_PATH + "index", NAMESPACE_ID)
+                .get(BASE_PATH + "/index", NAMESPACE_ID)
                 .then()
                 .statusCode(200)
                 .body("size()", equalTo(1))

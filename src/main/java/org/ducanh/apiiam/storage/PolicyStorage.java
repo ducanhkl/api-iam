@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class PolicyStorage {
+    // TODO: change to ChronicleMap
     private final Map<String, Set<String>> mapGroupIdToSetPermissionId;
 
     @Getter

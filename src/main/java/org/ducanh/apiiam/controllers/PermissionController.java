@@ -23,7 +23,7 @@ import static org.ducanh.apiiam.Constants.*;
 
 
 @RestController
-@RequestMapping("/permission/namespace-id/{namespaceId}/")
+@RequestMapping("/permission/namespace-id/{namespaceId}")
 @RequiredArgsConstructor
 @Slf4j
 public class PermissionController {

@@ -36,7 +36,7 @@ public class PolicyStorageManagement {
         initiatingPolicy();
     }
 
-    private void initiatingPolicy() {
+    public void initiatingPolicy() {
         List<Namespace> namespaces = namespaceRepository.findAll();
         List<CompletableFuture<Void>> futures = namespaces.stream()
                 .map((namespace) -> CompletableFuture.runAsync(() -> initiatingPolicy(namespace), commonThreadPool))
